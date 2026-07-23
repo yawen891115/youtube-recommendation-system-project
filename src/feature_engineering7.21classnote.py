@@ -82,12 +82,19 @@ class FeatureEngineer:
         return result
 
     def create_user_features(self, interactions_df, users_df):
-
+        # 函数里的参数是interactions_df和users_df，到时候调用函数的时候分别传入interactions_clean.csv和users.csv
         interactions = interactions_df.copy()
-        interactions["timestamp"] = self._datetime(interactions["timestemp"])
+        interactions["timestamp"] = self._datetime(interactions["timestamp"])
 
         #groupby
+        '''
+        原始的 interactions 表是"每一次交互一行"(某用户在某时刻看了某视频、点没点赞、看了多久)。
+        我们想把它变成"每个用户一行"的用户画像表(这个用户平均看多久、总共点了多少赞、第一次和最后一次交互是什么时候)
+        '''
         stats = interactions.groupby("user_id").agg(
+        # .groupby("user_id"): 把整张表按 user_id 的值分组,不会有可见输出,它只是准备了分组的意图
+        # .agg(): 对每个分组,做聚合计算，结构如 新列名 = ("原列名", "聚合函数")
+
             # 平均观看时长
             watch_time_mean = ("watch_time", "mean"),
             # 观看时长的标准差
@@ -106,7 +113,8 @@ class FeatureEngineer:
             first_seen = ("timestamp", "min"),
             # 最近交互
             last_seen = ("timestamp", "max"),
-        ).reset_index() #把分组索引转化为列
+        ).reset_index() 
+        # agg完了以后，df的索引是user_id，reset_index()把user_id变成一列，索引变成默认的0,1,2,3...
 
         # 用户活跃天数
         stats["user_tenure_days"] = (
@@ -120,7 +128,7 @@ class FeatureEngineer:
 
         result = users_df.merge(stats, on = "user_id", how = "left")
 
-        numeric = result.select_detypes(include = np.nan).colums
+        numeric = result.select_dtypes(include = np.nan).columns
         result[numeric] = result[numeric].fillna(0)
 
         return result

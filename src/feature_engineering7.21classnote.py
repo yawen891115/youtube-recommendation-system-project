@@ -1,32 +1,41 @@
 from pathlib import Path
 import logging
-import pickle
+import pickle #可以保存程序里的变量、列表、字典、模型等，下次直接load就行，不用重新训练模型，对ml尤其好用
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LableEncoder, OneHotEncoder, MinMaxScaler
+#LabelEncoder：把类别标签转成整数编号，通常用于目标变量y
+#OneHotEncoder：把特征X转成0/1，如性别，男性0，女性1
+#MinMaxScaler：把数值型特征缩放到0-1之间，通常用于特征X
 
-#logging
+#logging：创建一个info级别的日志，按照时间、日志级别、日志信息的格式输出到终端
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s-%(levelname)s-%(message)s"
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__) #创建一个日志小助手
 
 class FeatureEngineer:
     def __init__(self):
-        """初始化特征工程"""
+        """初始化特征工程，以下三个都是字典，key是列名，value是对应的处理器"""
         self.scalers = {}  # save MinMaxScaler
+        # 存放每一列对应的 MinMaxScaler 实例,比如 {"age": MinMaxScaler(), "income": MinMaxScaler()}
 
         self.encoders = {}  #保存类别编码
+        # 存放每一列对应的类别编码器,比如 {"gender": OneHotEncoder(), "city": LabelEncoder()}
 
         self.embeddings = {}  #SVD -> 找隐藏特征，和PCA类比学习
+        # 存放 SVD 分解出来的隐藏特征,比如 {"user_id": SVD(), "video_id": SVD()}
 
-    @staticmethod
+    @staticmethod #在class中，如果一个函数第一个参数不是self，而是一个普通的参数，那么就加上@staticmethod，表示这个函数是静态方法
+    # 静态方法和class创建出的object无关，而其他函数都和object有关，因为都有self参数，self可以理解成class创建出的object
     def _datetime(series):
         # 解析失败返回NaT
-        converted = pd.to_datetime(series, errors="coerce") #出现日期错误的时候如2.30他就会转换成NaT
-        # 解析之后返回空的话就把现在的时间戳填充进去
+        converted = pd.to_datetime(series, errors="coerce") 
+        # 把字符串列转成datetime类型;遇到解析不了的(比如2月30日),不报错,而是变成 NaT(Not a Time)
+        
+        # 解析之后返回NaT的话就把现在的时间戳填充进去
         return converted.fillna(pd.Timestamp.now())
 
     def create_temporal_features(self, df):
@@ -38,13 +47,19 @@ class FeatureEngineer:
         result["timestamp"] = self._datetime(result["timestamp"]) #把等号右边处理过的值赋值给等号左边，覆盖掉旧的timestamp列
 
         # 提取小时（0-23）
-        result["hour_of_day"] = result["timestamp"].dt.hour #新增加了新的一列（hour）
+        result["hour_of_day"] = result["timestamp"].dt.hour 
+        # 等号右边的dt.hour是把timestamp列的每个元素都取出小时部分，返回一个Series对象
+        # 等号左边是把这个Series,作为新的一列塞进result这个DataFrame里
+        # .dt 是 pandas 专门给 datetime 类型列准备的"工具包",后面接不同属性,取出时间的不同部分
 
         # 提取周几
-        result["day_of_week"] = result["timestamp"].dt.dayofweek #新增加了新的一列（day_of_week）
+        result["day_of_week"] = result["timestamp"].dt.dayofweek
+        # 周一是0，周二是1，···，周日是6
 
         # 判断是否周末
         result["is_weekend"] = (result["day_of_week"] >= 5).astype(int)
+        # result["day_of_week"] >= 5是一个布尔型Series
+        # astype(int)是把布尔型Series转成整数型Series，True变成1，False变成0
 
         # 提取月份 (1-12)
         result["month"] = result["timestamp"].dt.month
@@ -52,15 +67,17 @@ class FeatureEngineer:
         # -1~6 night; 6~12 morning; 12~18 afternoon; 18~23 evening
         result["day_period"] = pd.cut(
             result["hour_of_day"],
-            bins=[-1, 6, 12, 18, 23]
-            labels=["night", "morning", "afternoon", "evening"]
+            bins=[-1, 6, 12, 18, 23], # 分切点
+            labels=["night", "morning", "afternoon", "evening"] # 每一段起的名字
         )
+        # pd.cut: 把一列连续的数字,按照你指定的分界点,切成几段区间,每段贴一个标签
 
         # 最新时间
         latest = result["timestamp"].max()
 
         # 传播天数
         result["recency_days"] = (latest - result["timestamp"]).dt.total_seconds() / (60 * 60 * 24)
+        # 算出"每一条记录,距离数据集里最新那条记录,过去了多少天",存成新的一列 recency_days
 
         return result
 
@@ -112,9 +129,9 @@ class FeatureEngineer:
 
 
 
-def main():  #python中不知道写什么要写pass，可以让他过
+def main():  #python中不知道写什么就写pass，不会中断程序运行
     #读取数据
-    users = pd.read_csv("data/users.csv") #涉及到中文文本格式的话编码格式encoding就要变成utf-8
+    users = pd.read_csv("data/users.csv") #read_csv中有一个encoding参数，涉及到中文文本格式的话编码格式encoding就要变成utf-8
     videos = pd.read_csv("data/videos.csv")
     interactions = pd.read_csv("data/interactions.csv")
 

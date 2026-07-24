@@ -8,7 +8,7 @@ from sklearn.preprocessing import LableEncoder, OneHotEncoder, MinMaxScaler
 #OneHotEncoder：把特征X转成0/1，如性别，男性0，女性1
 #MinMaxScaler：把数值型特征缩放到0-1之间，通常用于特征X
 
-#logging：创建一个info级别的日志，按照时间、日志级别、日志信息的格式输出到终端
+#logging：创建一个info级别及以上的日志，按照时间、日志级别、日志信息的格式输出到终端
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s-%(levelname)s-%(message)s"
@@ -16,40 +16,56 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__) #创建一个日志小助手
 
+"""关于class和main函数的结构上课时问一下老师"""
 class FeatureEngineer:
     def __init__(self):
-        """初始化特征工程，以下三个都是字典，key是列名，value是对应的处理器"""
-        self.scalers = {}  # save MinMaxScaler
-        # 存放每一列对应的 MinMaxScaler 实例,比如 {"age": MinMaxScaler(), "income": MinMaxScaler()}
+        '''
+        初始化特征工程，以下三个都是字典，key是列名，value是对应的处理器
+        创建存储字典，用于保存后续训练阶段需要复用的对象。这些对象在训练时fit（拟合），推理时只load不fit。
+        '''
+        # scalers字典：保存MinMaxScaler对象
+        # 键如"watch_time"表示对watch_time列的缩放器
+        # 值是已经fit好的MinMaxScaler实例
+        self.scalers = {}
 
-        self.encoders = {}  #保存类别编码
-        # 存放每一列对应的类别编码器,比如 {"gender": OneHotEncoder(), "city": LabelEncoder()}
+        # encoders字典：保存类别编码器
+        # 包含LabelEncoder（ID编码）和OneHotEncoder（类别编码）
+        self.encoders = {}
 
-        self.embeddings = {}  #SVD -> 找隐藏特征，和PCA类比学习
-        # 存放 SVD 分解出来的隐藏特征,比如 {"user_id": SVD(), "video_id": SVD()}
-
-    @staticmethod #在class中，如果一个函数第一个参数不是self，而是一个普通的参数，那么就加上@staticmethod，表示这个函数是静态方法
-    # 静态方法和class创建出的object无关，而其他函数都和object有关，因为都有self参数，self可以理解成class创建出的object
+        # embeddings字典：保存向量表示
+        # 包含SVD模型和用户/视频的低维向量
+        self.embeddings = {}
+    
+    @staticmethod 
+    #静态方法(static method)= 写在 class 里面、但不需要用到 object 自身数据的函数, 是一个放在class里的普通函数
+    #先判断:这个函数需不需要用到某个 object 的数据(self.xxx)?不需要 → 它就该设计成静态方法 → 于是不写 self + 加 @staticmethod
+    #self可以理解成class创建出的object，静态方法和class创建出的object无关，这里的其他函数和self有关
+    #该静态方法只能在这个class内部使用
     def _datetime(series):
         # 解析失败返回NaT
         converted = pd.to_datetime(series, errors="coerce") 
-        # 把字符串列转成datetime类型;遇到解析不了的(比如2月30日),不报错,而是变成 NaT(Not a Time)
+        #series指一维向量，csv里的一列，如join_date; string指的是一列里的每个字段，如2020-01-01 00:00:00.000000000
+        #把series里的string列转成series里的datetime类型，converted还是series
+        #遇到解析不了的(比如2月30日),不报错,而是变成 NaT(Not a Time)
         
-        # 解析之后返回NaT的话就把现在的时间戳填充进去
+        
+        # 把NaT用现在的时间戳填充进去
         return converted.fillna(pd.Timestamp.now())
+        # pd.Timestamp是使用pandas这个工具箱里面Timestamp这个class，他的作用是生成具体的时间点
+        # .now是给具体的时间点为现在
 
     def create_temporal_features(self, df):
         """小时、星期、周末、月份、时间线"""
         # copy()创建深拷贝，不修改原始的DataFrame
         result = df.copy()
 
-        # timestamp从字符串转换为datatime对象 xxxx-xx-xx xx:xx:xx
-        result["timestamp"] = self._datetime(result["timestamp"]) #把等号右边处理过的值赋值给等号左边，覆盖掉旧的timestamp列
+        # 调用_datetime函数，timestamp从字符串转换为datatime对象 xxxx-xx-xx xx:xx:xx
+        result["timestamp"] = self._datetime(result["timestamp"])
+         #处理interactioncsv，把等号右边处理过的值赋值给等号左边，覆盖掉旧的timestamp列
 
         # 提取小时（0-23）
         result["hour_of_day"] = result["timestamp"].dt.hour 
-        # 等号右边的dt.hour是把timestamp列的每个元素都取出小时部分，返回一个Series对象
-        # 等号左边是把这个Series,作为新的一列塞进result这个DataFrame里
+        # 等号右边的dt.hour是取出小时，返回一个Series对象,创建新的列
         # .dt 是 pandas 专门给 datetime 类型列准备的"工具包",后面接不同属性,取出时间的不同部分
 
         # 提取周几
@@ -92,7 +108,7 @@ class FeatureEngineer:
         我们想把它变成"每个用户一行"的用户画像表(这个用户平均看多久、总共点了多少赞、第一次和最后一次交互是什么时候)
         '''
         stats = interactions.groupby("user_id").agg(
-        # .groupby("user_id"): 把整张表按 user_id 的值分组,不会有可见输出,它只是准备了分组的意图
+        # .groupby("user_id"): 把整张表按 user_id 的值分组,不会有可见输出,只是表达分组的意图
         # .agg(): 对每个分组,做聚合计算，结构如 新列名 = ("原列名", "聚合函数")
 
             # 平均观看时长

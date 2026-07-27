@@ -122,6 +122,7 @@ def get_confidence(prob: float) -> str:
 # ============================================
 
 # 接口 1：健康检查
+# 看模型是否正常加载了
 @app.get("/health")
 def health():
     """检查服务是否正常运行"""
@@ -134,7 +135,7 @@ def health():
 
 # 接口 2：单条预测
 @app.post("/predict", response_model=PredictionResponse)
-def predict(request: PredictionRequest):
+def predict(request: PredictionRequest): 
     """根据用户ID、视频ID、观看时长预测是否点赞"""
     import time
     start = time.time()
@@ -149,18 +150,20 @@ def predict(request: PredictionRequest):
         prob = float(model.predict(df)[0])
     prob = float(np.clip(prob, 0, 1))  # 限制在 [0, 1] 范围
 
+# 展示给前端的东西
     return PredictionResponse(
         user_id=request.user_id,
         video_id=request.video_id,
         probability=prob,
         confidence=get_confidence(prob),
         model_version="1.0.0",
-        response_time_ms=(time.time() - start) * 1000,
+        response_time_ms=(time.time() - start) * 1000, #响应时间
         timestamp=datetime.now(),
     )
 
 
 # 接口 3：批量预测
+# 在单条预测的基础上加上一层for循环
 @app.post("/predict/batch")
 def predict_batch(request: BatchPredictionRequest):
     """一次性预测多条，单条失败不影响其他条"""

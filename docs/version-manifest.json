@@ -1,0 +1,435 @@
+{
+  "selected_base_versions": [
+    "v01",
+    "v06",
+    "v07"
+  ],
+  "audit_method": "file contents, SHA-256, archive timestamps and implemented behavior",
+  "archives": [
+    {
+      "archive": "8.6youtube-recommendation-system-project(1).zip",
+      "version": "v01",
+      "files": [
+        {
+          "path": "streamlit_app.py",
+          "timestamp": "2026-08-06 20:28:36",
+          "sha256": "174a0000b27a73d20b236901208f5b8c90e4ae80988d5c94eaa9aab1570fec8e",
+          "bytes": 5896
+        },
+        {
+          "path": "src/feature_engineering.py",
+          "timestamp": "2026-08-06 20:26:58",
+          "sha256": "68a8608fbc878a38356a4a67912a218f5d0c79334cd93a1564df30e5fbc0070c",
+          "bytes": 12055
+        },
+        {
+          "path": "src/__init__.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        {
+          "path": "src/data_validation.py",
+          "timestamp": "2026-08-06 20:25:18",
+          "sha256": "4027b09ef5d4ccb82c6d962ba432ae849bda8d667c36160f16e2fe7c64dbcbce",
+          "bytes": 8073
+        },
+        {
+          "path": "src/api.py",
+          "timestamp": "2026-08-06 20:25:08",
+          "sha256": "6c79fc1f4ed12cfdef17f53ebb18a7f955e7b3f1492881cc709cce0268c6640b",
+          "bytes": 6064
+        },
+        {
+          "path": "src/train.py",
+          "timestamp": "2026-08-06 20:25:14",
+          "sha256": "80bc17159d822c69e24aa6b60be0e202f295a91f2396becf865abe7bb5331eb4",
+          "bytes": 18673
+        }
+      ]
+    },
+    {
+      "archive": "old youtube(1).zip",
+      "version": "v03",
+      "files": [
+        {
+          "path": "YouTube Shorts Video Recommendation System.md",
+          "timestamp": "2026-07-18 16:20:20",
+          "sha256": "fc662fcaf5255aced422a8914cf0cdb0d45310c9231a5700b5c767e8dbf6cc85",
+          "bytes": 18072
+        },
+        {
+          "path": "old_version05_streamlit_app.py",
+          "timestamp": "2026-07-27 14:47:50",
+          "sha256": "0a3e6e06c8938a7f6a72eaeaadb4fe7340cb90f6b78602b938a71b64aa4196d1",
+          "bytes": 1511
+        },
+        {
+          "path": "05_streamlit_app.py",
+          "timestamp": "2026-08-06 18:29:44",
+          "sha256": "09fd06b9ce482b7ddc21214949b5e443fd8965083040722fb9c4d7e9c4148d43",
+          "bytes": 12091
+        },
+        {
+          "path": "src/old_version_feature_engineering.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "073937984375e7088835677009e4aac63d328e95376f87629a20c265ebb60261",
+          "bytes": 7976
+        },
+        {
+          "path": "src/02_feature_engineering.py",
+          "timestamp": "2026-07-30 09:55:48",
+          "sha256": "cbc7283476831919b23fcb6ae15384639d0f7369b6aeaefbac883cad425f3328",
+          "bytes": 34137
+        },
+        {
+          "path": "src/01_data_validation.py",
+          "timestamp": "2026-07-30 09:51:30",
+          "sha256": "f5028584dae4b0bd36480d092f9d21ed5a791f0f08872cd67687103320d0bea4",
+          "bytes": 10842
+        },
+        {
+          "path": "src/__init__.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        {
+          "path": "src/old_version_data_validation.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "86b4e3e1507735d7b61ce25e956fd12245a4e5b7a73a339c7b840bdf0f48b6c9",
+          "bytes": 5044
+        },
+        {
+          "path": "src/04_api.py",
+          "timestamp": "2026-08-06 19:08:18",
+          "sha256": "d728c78e10bac43d6f0e12ddd4327b0716428ce37b9915a27a3ad33a78ea7896",
+          "bytes": 7904
+        },
+        {
+          "path": "src/old_version_feature_engineering_total.py",
+          "timestamp": "2026-07-27 14:54:12",
+          "sha256": "943b13f24e8c087d9c412d46a28bbfcb04b4f83c070dec7c5fe047f359c4fd3e",
+          "bytes": 29763
+        },
+        {
+          "path": "src/03_train.py",
+          "timestamp": "2026-08-06 17:40:46",
+          "sha256": "6452173e01a14eff056e0a66604820cbc0beffe81d6841daec215cc7e9d7704a",
+          "bytes": 21426
+        }
+      ]
+    },
+    {
+      "archive": "youtube-recommendation-system-project 2(1).zip",
+      "version": "v04",
+      "files": [
+        {
+          "path": "YouTube Shorts Video Recommendation System.md",
+          "timestamp": "2026-07-18 16:20:20",
+          "sha256": "fc662fcaf5255aced422a8914cf0cdb0d45310c9231a5700b5c767e8dbf6cc85",
+          "bytes": 18072
+        },
+        {
+          "path": "old_05_streamlit_app.py",
+          "timestamp": "2026-07-27 14:47:50",
+          "sha256": "0a3e6e06c8938a7f6a72eaeaadb4fe7340cb90f6b78602b938a71b64aa4196d1",
+          "bytes": 1511
+        },
+        {
+          "path": "05_streamlit_app.py",
+          "timestamp": "2026-08-06 17:16:56",
+          "sha256": "9970d63339ee7680af215abccd61968f23f0340bfb4528aa6047ed92cd1622cc",
+          "bytes": 4667
+        },
+        {
+          "path": "src/old_version_feature_engineering.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "073937984375e7088835677009e4aac63d328e95376f87629a20c265ebb60261",
+          "bytes": 7976
+        },
+        {
+          "path": "src/02_feature_engineering.py",
+          "timestamp": "2026-07-30 09:55:48",
+          "sha256": "cbc7283476831919b23fcb6ae15384639d0f7369b6aeaefbac883cad425f3328",
+          "bytes": 34137
+        },
+        {
+          "path": "src/01_data_validation.py",
+          "timestamp": "2026-07-30 09:51:30",
+          "sha256": "f5028584dae4b0bd36480d092f9d21ed5a791f0f08872cd67687103320d0bea4",
+          "bytes": 10842
+        },
+        {
+          "path": "src/__init__.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        {
+          "path": "src/old_version_data_validation.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "86b4e3e1507735d7b61ce25e956fd12245a4e5b7a73a339c7b840bdf0f48b6c9",
+          "bytes": 5044
+        },
+        {
+          "path": "src/04_api.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "eb06e0b1bb6999905d2c47ce3fc85017ab82ff40f5ad4ec8b824846f6bfaac5c",
+          "bytes": 7023
+        },
+        {
+          "path": "src/old_version_feature_engineering_total.py",
+          "timestamp": "2026-07-27 14:54:12",
+          "sha256": "943b13f24e8c087d9c412d46a28bbfcb04b4f83c070dec7c5fe047f359c4fd3e",
+          "bytes": 29763
+        },
+        {
+          "path": "src/03_train.py",
+          "timestamp": "2026-08-06 16:45:46",
+          "sha256": "3792b41019bd01e4e4b3b2e71c74b4f1b93fa82982b566216a63f30c0901e066",
+          "bytes": 21116
+        }
+      ]
+    },
+    {
+      "archive": "youtube-recommendation-system-project 3(1).zip",
+      "version": "v05",
+      "files": [
+        {
+          "path": "YouTube Shorts Video Recommendation System.md",
+          "timestamp": "2026-07-18 16:20:20",
+          "sha256": "fc662fcaf5255aced422a8914cf0cdb0d45310c9231a5700b5c767e8dbf6cc85",
+          "bytes": 18072
+        },
+        {
+          "path": "05_streamlit_app.py",
+          "timestamp": "2026-07-27 14:47:50",
+          "sha256": "0a3e6e06c8938a7f6a72eaeaadb4fe7340cb90f6b78602b938a71b64aa4196d1",
+          "bytes": 1511
+        },
+        {
+          "path": "scripts/build_training_design_report.py",
+          "timestamp": "2026-07-29 17:15:14",
+          "sha256": "9c7ce14b3a0febbecd2b7ffb910775698edb7cfdba9e4b907a8f0c5f3d9a5226",
+          "bytes": 8603
+        },
+        {
+          "path": "src/old_version_feature_engineering.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "073937984375e7088835677009e4aac63d328e95376f87629a20c265ebb60261",
+          "bytes": 7976
+        },
+        {
+          "path": "src/02_feature_engineering.py",
+          "timestamp": "2026-07-30 09:55:48",
+          "sha256": "cbc7283476831919b23fcb6ae15384639d0f7369b6aeaefbac883cad425f3328",
+          "bytes": 34137
+        },
+        {
+          "path": "src/01_data_validation.py",
+          "timestamp": "2026-07-30 09:51:30",
+          "sha256": "f5028584dae4b0bd36480d092f9d21ed5a791f0f08872cd67687103320d0bea4",
+          "bytes": 10842
+        },
+        {
+          "path": "src/__init__.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        {
+          "path": "src/old_version_data_validation.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "86b4e3e1507735d7b61ce25e956fd12245a4e5b7a73a339c7b840bdf0f48b6c9",
+          "bytes": 5044
+        },
+        {
+          "path": "src/04_api.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "eb06e0b1bb6999905d2c47ce3fc85017ab82ff40f5ad4ec8b824846f6bfaac5c",
+          "bytes": 7023
+        },
+        {
+          "path": "src/old_version_feature_engineering_total.py",
+          "timestamp": "2026-07-27 14:54:12",
+          "sha256": "943b13f24e8c087d9c412d46a28bbfcb04b4f83c070dec7c5fe047f359c4fd3e",
+          "bytes": 29763
+        },
+        {
+          "path": "src/03_train.py",
+          "timestamp": "2026-07-30 20:25:56",
+          "sha256": "f0c6c52ec8e1b8981cabbd499dc696413af482410d4271921b1a2d96252ad90e",
+          "bytes": 19259
+        }
+      ]
+    },
+    {
+      "archive": "youtube-recommendation-system-project 4(1).zip",
+      "version": "v06",
+      "files": [
+        {
+          "path": "streamlit_app.py",
+          "timestamp": "2026-08-06 20:28:36",
+          "sha256": "174a0000b27a73d20b236901208f5b8c90e4ae80988d5c94eaa9aab1570fec8e",
+          "bytes": 5896
+        },
+        {
+          "path": "src/feature_engineering.py",
+          "timestamp": "2026-08-06 20:26:58",
+          "sha256": "68a8608fbc878a38356a4a67912a218f5d0c79334cd93a1564df30e5fbc0070c",
+          "bytes": 12055
+        },
+        {
+          "path": "src/__init__.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        {
+          "path": "src/data_validation.py",
+          "timestamp": "2026-08-06 20:25:18",
+          "sha256": "4027b09ef5d4ccb82c6d962ba432ae849bda8d667c36160f16e2fe7c64dbcbce",
+          "bytes": 8073
+        },
+        {
+          "path": "src/api.py",
+          "timestamp": "2026-08-06 20:25:08",
+          "sha256": "6c79fc1f4ed12cfdef17f53ebb18a7f955e7b3f1492881cc709cce0268c6640b",
+          "bytes": 6064
+        },
+        {
+          "path": "src/train.py",
+          "timestamp": "2026-08-06 20:25:14",
+          "sha256": "80bc17159d822c69e24aa6b60be0e202f295a91f2396becf865abe7bb5331eb4",
+          "bytes": 18673
+        },
+        {
+          "path": "src/03_train.py",
+          "timestamp": "2026-08-20 20:29:24",
+          "sha256": "f0c6c52ec8e1b8981cabbd499dc696413af482410d4271921b1a2d96252ad90e",
+          "bytes": 19259
+        }
+      ]
+    },
+    {
+      "archive": "youtube-recommendation-system-project 5(1).zip",
+      "version": "v07",
+      "files": [
+        {
+          "path": "streamlit_app.py",
+          "timestamp": "2026-08-06 20:28:36",
+          "sha256": "174a0000b27a73d20b236901208f5b8c90e4ae80988d5c94eaa9aab1570fec8e",
+          "bytes": 5896
+        },
+        {
+          "path": "src/feature_engineering.py",
+          "timestamp": "2026-08-06 20:26:58",
+          "sha256": "68a8608fbc878a38356a4a67912a218f5d0c79334cd93a1564df30e5fbc0070c",
+          "bytes": 12055
+        },
+        {
+          "path": "src/__init__.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        {
+          "path": "src/data_validation.py",
+          "timestamp": "2026-08-06 20:25:18",
+          "sha256": "4027b09ef5d4ccb82c6d962ba432ae849bda8d667c36160f16e2fe7c64dbcbce",
+          "bytes": 8073
+        },
+        {
+          "path": "src/api.py",
+          "timestamp": "2026-08-06 20:25:08",
+          "sha256": "6c79fc1f4ed12cfdef17f53ebb18a7f955e7b3f1492881cc709cce0268c6640b",
+          "bytes": 6064
+        },
+        {
+          "path": "src/train.py",
+          "timestamp": "2026-08-06 20:25:14",
+          "sha256": "80bc17159d822c69e24aa6b60be0e202f295a91f2396becf865abe7bb5331eb4",
+          "bytes": 18673
+        }
+      ]
+    },
+    {
+      "archive": "youtube-recommendation-system-project(1).zip",
+      "version": "v08",
+      "files": [
+        {
+          "path": "YouTube Shorts Video Recommendation System.md",
+          "timestamp": "2026-07-18 16:20:20",
+          "sha256": "fc662fcaf5255aced422a8914cf0cdb0d45310c9231a5700b5c767e8dbf6cc85",
+          "bytes": 18072
+        },
+        {
+          "path": "05_streamlit_app.py",
+          "timestamp": "2026-07-27 14:47:50",
+          "sha256": "0a3e6e06c8938a7f6a72eaeaadb4fe7340cb90f6b78602b938a71b64aa4196d1",
+          "bytes": 1511
+        },
+        {
+          "path": "scripts/build_training_design_report.py",
+          "timestamp": "2026-07-29 17:15:14",
+          "sha256": "9c7ce14b3a0febbecd2b7ffb910775698edb7cfdba9e4b907a8f0c5f3d9a5226",
+          "bytes": 8603
+        },
+        {
+          "path": "src/old_version_feature_engineering.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "073937984375e7088835677009e4aac63d328e95376f87629a20c265ebb60261",
+          "bytes": 7976
+        },
+        {
+          "path": "src/02_feature_engineering.py",
+          "timestamp": "2026-07-30 09:55:48",
+          "sha256": "cbc7283476831919b23fcb6ae15384639d0f7369b6aeaefbac883cad425f3328",
+          "bytes": 34137
+        },
+        {
+          "path": "src/01_data_validation.py",
+          "timestamp": "2026-07-30 09:51:30",
+          "sha256": "f5028584dae4b0bd36480d092f9d21ed5a791f0f08872cd67687103320d0bea4",
+          "bytes": 10842
+        },
+        {
+          "path": "src/__init__.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        {
+          "path": "src/old_version_data_validation.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "86b4e3e1507735d7b61ce25e956fd12245a4e5b7a73a339c7b840bdf0f48b6c9",
+          "bytes": 5044
+        },
+        {
+          "path": "src/04_api.py",
+          "timestamp": "2026-07-27 14:31:14",
+          "sha256": "eb06e0b1bb6999905d2c47ce3fc85017ab82ff40f5ad4ec8b824846f6bfaac5c",
+          "bytes": 7023
+        },
+        {
+          "path": "src/old_version_feature_engineering_total.py",
+          "timestamp": "2026-07-27 14:54:12",
+          "sha256": "943b13f24e8c087d9c412d46a28bbfcb04b4f83c070dec7c5fe047f359c4fd3e",
+          "bytes": 29763
+        },
+        {
+          "path": "src/03_train.py",
+          "timestamp": "2026-07-30 20:25:56",
+          "sha256": "f0c6c52ec8e1b8981cabbd499dc696413af482410d4271921b1a2d96252ad90e",
+          "bytes": 19259
+        }
+      ]
+    }
+  ],
+  "raw_data_sha256": {
+    "users.csv": "70d6d2066af4dfad7bd9da9ea2b0a2cef8df87064628f29090619ddd86c299f5",
+    "videos.csv": "4818191586ad94a4cd5d7b83bb8834a91f5e76f8673ed5117086acc2124cb905",
+    "interactions_cleaned.csv": "ae5ac4d635584c2c182a83f9f2d0e6243a14777a8870f9f93c6ec494fa941227"
+  }
+}

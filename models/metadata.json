@@ -1,0 +1,1045 @@
+{
+  "model_version": "789b70a8fbd7",
+  "model_file": "best_model_lightgbm_optuna.pkl",
+  "model_name": "lightgbm_optuna",
+  "feature_columns": [
+    "watch_time",
+    "age",
+    "duration_sec",
+    "hour_of_day",
+    "day_of_week",
+    "is_weekend",
+    "month",
+    "completion_rate",
+    "watch_time_normalized",
+    "hour_weekend_interaction",
+    "user_cold_start",
+    "video_cold_start",
+    "video_age_days",
+    "user_watch_mean",
+    "user_watch_std",
+    "user_watch_count",
+    "user_liked_mean",
+    "user_liked_sum",
+    "user_shared_mean",
+    "user_shared_sum",
+    "user_recency_days",
+    "user_tenure_days",
+    "user_session_id",
+    "user_session_length",
+    "user_session_duration_minutes",
+    "user_recent_engagement",
+    "user_category_diversity",
+    "video_watch_mean",
+    "video_watch_std",
+    "video_watch_count",
+    "video_liked_mean",
+    "video_liked_sum",
+    "video_shared_mean",
+    "video_shared_sum",
+    "video_recency_days",
+    "video_tenure_days",
+    "recency_days",
+    "interactions_per_day",
+    "video_popularity",
+    "engagement_rate",
+    "popularity_watch_ratio",
+    "gender_M",
+    "gender_F",
+    "gender_Other",
+    "gender_unknown",
+    "category_Comedy",
+    "category_Education",
+    "category_Fashion",
+    "category_Food",
+    "category_Gaming",
+    "category_Music",
+    "category_Sports",
+    "category_Travel",
+    "category_unknown",
+    "preferred_category_Comedy",
+    "preferred_category_Education",
+    "preferred_category_Fashion",
+    "preferred_category_Food",
+    "preferred_category_Gaming",
+    "preferred_category_Music",
+    "preferred_category_Sports",
+    "preferred_category_Travel",
+    "preferred_category_unknown",
+    "day_period_night",
+    "day_period_morning",
+    "day_period_afternoon",
+    "day_period_evening",
+    "user_emb_0",
+    "user_emb_1",
+    "user_emb_2",
+    "user_emb_3",
+    "user_emb_4",
+    "user_emb_5",
+    "user_emb_6",
+    "user_emb_7",
+    "user_emb_8",
+    "user_emb_9",
+    "user_emb_10",
+    "user_emb_11",
+    "user_emb_12",
+    "user_emb_13",
+    "user_emb_14",
+    "user_emb_15",
+    "user_emb_16",
+    "user_emb_17",
+    "user_emb_18",
+    "user_emb_19",
+    "user_emb_20",
+    "user_emb_21",
+    "user_emb_22",
+    "user_emb_23",
+    "user_emb_24",
+    "user_emb_25",
+    "user_emb_26",
+    "user_emb_27",
+    "user_emb_28",
+    "user_emb_29",
+    "user_emb_30",
+    "user_emb_31",
+    "user_emb_32",
+    "user_emb_33",
+    "user_emb_34",
+    "user_emb_35",
+    "user_emb_36",
+    "user_emb_37",
+    "user_emb_38",
+    "user_emb_39",
+    "user_emb_40",
+    "user_emb_41",
+    "user_emb_42",
+    "user_emb_43",
+    "user_emb_44",
+    "user_emb_45",
+    "user_emb_46",
+    "user_emb_47",
+    "user_emb_48",
+    "user_emb_49",
+    "video_emb_0",
+    "video_emb_1",
+    "video_emb_2",
+    "video_emb_3",
+    "video_emb_4",
+    "video_emb_5",
+    "video_emb_6",
+    "video_emb_7",
+    "video_emb_8",
+    "video_emb_9",
+    "video_emb_10",
+    "video_emb_11",
+    "video_emb_12",
+    "video_emb_13",
+    "video_emb_14",
+    "video_emb_15",
+    "video_emb_16",
+    "video_emb_17",
+    "video_emb_18",
+    "video_emb_19",
+    "video_emb_20",
+    "video_emb_21",
+    "video_emb_22",
+    "video_emb_23",
+    "video_emb_24",
+    "video_emb_25",
+    "video_emb_26",
+    "video_emb_27",
+    "video_emb_28",
+    "video_emb_29",
+    "video_emb_30",
+    "video_emb_31",
+    "video_emb_32",
+    "video_emb_33",
+    "video_emb_34",
+    "video_emb_35",
+    "video_emb_36",
+    "video_emb_37",
+    "video_emb_38",
+    "video_emb_39",
+    "video_emb_40",
+    "video_emb_41",
+    "video_emb_42",
+    "video_emb_43",
+    "video_emb_44",
+    "video_emb_45",
+    "video_emb_46",
+    "video_emb_47",
+    "video_emb_48",
+    "video_emb_49"
+  ],
+  "ranking_feature_columns": [
+    "age",
+    "duration_sec",
+    "hour_of_day",
+    "day_of_week",
+    "is_weekend",
+    "month",
+    "hour_weekend_interaction",
+    "user_cold_start",
+    "video_cold_start",
+    "video_age_days",
+    "user_watch_mean",
+    "user_watch_std",
+    "user_watch_count",
+    "user_liked_mean",
+    "user_liked_sum",
+    "user_shared_mean",
+    "user_shared_sum",
+    "user_recency_days",
+    "user_tenure_days",
+    "user_session_id",
+    "user_session_length",
+    "user_session_duration_minutes",
+    "user_recent_engagement",
+    "user_category_diversity",
+    "video_watch_mean",
+    "video_watch_std",
+    "video_watch_count",
+    "video_liked_mean",
+    "video_liked_sum",
+    "video_shared_mean",
+    "video_shared_sum",
+    "video_recency_days",
+    "video_tenure_days",
+    "recency_days",
+    "interactions_per_day",
+    "video_popularity",
+    "engagement_rate",
+    "gender_M",
+    "gender_F",
+    "gender_Other",
+    "gender_unknown",
+    "category_Comedy",
+    "category_Education",
+    "category_Fashion",
+    "category_Food",
+    "category_Gaming",
+    "category_Music",
+    "category_Sports",
+    "category_Travel",
+    "category_unknown",
+    "preferred_category_Comedy",
+    "preferred_category_Education",
+    "preferred_category_Fashion",
+    "preferred_category_Food",
+    "preferred_category_Gaming",
+    "preferred_category_Music",
+    "preferred_category_Sports",
+    "preferred_category_Travel",
+    "preferred_category_unknown",
+    "day_period_night",
+    "day_period_morning",
+    "day_period_afternoon",
+    "day_period_evening",
+    "user_emb_0",
+    "user_emb_1",
+    "user_emb_2",
+    "user_emb_3",
+    "user_emb_4",
+    "user_emb_5",
+    "user_emb_6",
+    "user_emb_7",
+    "user_emb_8",
+    "user_emb_9",
+    "user_emb_10",
+    "user_emb_11",
+    "user_emb_12",
+    "user_emb_13",
+    "user_emb_14",
+    "user_emb_15",
+    "user_emb_16",
+    "user_emb_17",
+    "user_emb_18",
+    "user_emb_19",
+    "user_emb_20",
+    "user_emb_21",
+    "user_emb_22",
+    "user_emb_23",
+    "user_emb_24",
+    "user_emb_25",
+    "user_emb_26",
+    "user_emb_27",
+    "user_emb_28",
+    "user_emb_29",
+    "user_emb_30",
+    "user_emb_31",
+    "user_emb_32",
+    "user_emb_33",
+    "user_emb_34",
+    "user_emb_35",
+    "user_emb_36",
+    "user_emb_37",
+    "user_emb_38",
+    "user_emb_39",
+    "user_emb_40",
+    "user_emb_41",
+    "user_emb_42",
+    "user_emb_43",
+    "user_emb_44",
+    "user_emb_45",
+    "user_emb_46",
+    "user_emb_47",
+    "user_emb_48",
+    "user_emb_49",
+    "video_emb_0",
+    "video_emb_1",
+    "video_emb_2",
+    "video_emb_3",
+    "video_emb_4",
+    "video_emb_5",
+    "video_emb_6",
+    "video_emb_7",
+    "video_emb_8",
+    "video_emb_9",
+    "video_emb_10",
+    "video_emb_11",
+    "video_emb_12",
+    "video_emb_13",
+    "video_emb_14",
+    "video_emb_15",
+    "video_emb_16",
+    "video_emb_17",
+    "video_emb_18",
+    "video_emb_19",
+    "video_emb_20",
+    "video_emb_21",
+    "video_emb_22",
+    "video_emb_23",
+    "video_emb_24",
+    "video_emb_25",
+    "video_emb_26",
+    "video_emb_27",
+    "video_emb_28",
+    "video_emb_29",
+    "video_emb_30",
+    "video_emb_31",
+    "video_emb_32",
+    "video_emb_33",
+    "video_emb_34",
+    "video_emb_35",
+    "video_emb_36",
+    "video_emb_37",
+    "video_emb_38",
+    "video_emb_39",
+    "video_emb_40",
+    "video_emb_41",
+    "video_emb_42",
+    "video_emb_43",
+    "video_emb_44",
+    "video_emb_45",
+    "video_emb_46",
+    "video_emb_47",
+    "video_emb_48",
+    "video_emb_49"
+  ],
+  "training_cutoff": "2024-08-02T22:33:10+00:00",
+  "embedding_cutoff": "2024-01-22T09:13:59+00:00",
+  "feature_importance": [
+    {
+      "feature": "completion_rate",
+      "importance": 12.0
+    },
+    {
+      "feature": "video_recency_days",
+      "importance": 7.0
+    },
+    {
+      "feature": "watch_time",
+      "importance": 4.0
+    },
+    {
+      "feature": "video_watch_mean",
+      "importance": 3.0
+    },
+    {
+      "feature": "duration_sec",
+      "importance": 2.0
+    },
+    {
+      "feature": "user_watch_mean",
+      "importance": 2.0
+    },
+    {
+      "feature": "user_tenure_days",
+      "importance": 2.0
+    },
+    {
+      "feature": "engagement_rate",
+      "importance": 2.0
+    },
+    {
+      "feature": "user_emb_4",
+      "importance": 2.0
+    },
+    {
+      "feature": "user_emb_16",
+      "importance": 2.0
+    },
+    {
+      "feature": "hour_of_day",
+      "importance": 1.0
+    },
+    {
+      "feature": "video_age_days",
+      "importance": 1.0
+    },
+    {
+      "feature": "user_recency_days",
+      "importance": 1.0
+    },
+    {
+      "feature": "video_watch_count",
+      "importance": 1.0
+    },
+    {
+      "feature": "interactions_per_day",
+      "importance": 1.0
+    },
+    {
+      "feature": "category_Gaming",
+      "importance": 1.0
+    },
+    {
+      "feature": "preferred_category_Comedy",
+      "importance": 1.0
+    },
+    {
+      "feature": "preferred_category_Gaming",
+      "importance": 1.0
+    },
+    {
+      "feature": "day_period_afternoon",
+      "importance": 1.0
+    },
+    {
+      "feature": "user_emb_0",
+      "importance": 1.0
+    },
+    {
+      "feature": "user_emb_1",
+      "importance": 1.0
+    },
+    {
+      "feature": "user_emb_7",
+      "importance": 1.0
+    },
+    {
+      "feature": "user_emb_15",
+      "importance": 1.0
+    },
+    {
+      "feature": "user_emb_17",
+      "importance": 1.0
+    },
+    {
+      "feature": "user_emb_23",
+      "importance": 1.0
+    },
+    {
+      "feature": "user_emb_28",
+      "importance": 1.0
+    },
+    {
+      "feature": "user_emb_34",
+      "importance": 1.0
+    },
+    {
+      "feature": "user_emb_36",
+      "importance": 1.0
+    },
+    {
+      "feature": "user_emb_38",
+      "importance": 1.0
+    },
+    {
+      "feature": "user_emb_40",
+      "importance": 1.0
+    },
+    {
+      "feature": "user_emb_48",
+      "importance": 1.0
+    },
+    {
+      "feature": "video_emb_30",
+      "importance": 1.0
+    },
+    {
+      "feature": "video_emb_34",
+      "importance": 1.0
+    },
+    {
+      "feature": "video_emb_42",
+      "importance": 1.0
+    },
+    {
+      "feature": "video_emb_47",
+      "importance": 1.0
+    },
+    {
+      "feature": "age",
+      "importance": 0.0
+    },
+    {
+      "feature": "day_of_week",
+      "importance": 0.0
+    },
+    {
+      "feature": "is_weekend",
+      "importance": 0.0
+    },
+    {
+      "feature": "month",
+      "importance": 0.0
+    },
+    {
+      "feature": "watch_time_normalized",
+      "importance": 0.0
+    },
+    {
+      "feature": "hour_weekend_interaction",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_cold_start",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_cold_start",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_watch_std",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_watch_count",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_liked_mean",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_liked_sum",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_shared_mean",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_shared_sum",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_session_id",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_session_length",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_session_duration_minutes",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_recent_engagement",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_category_diversity",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_watch_std",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_liked_mean",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_liked_sum",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_shared_mean",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_shared_sum",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_tenure_days",
+      "importance": 0.0
+    },
+    {
+      "feature": "recency_days",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_popularity",
+      "importance": 0.0
+    },
+    {
+      "feature": "popularity_watch_ratio",
+      "importance": 0.0
+    },
+    {
+      "feature": "gender_M",
+      "importance": 0.0
+    },
+    {
+      "feature": "gender_F",
+      "importance": 0.0
+    },
+    {
+      "feature": "gender_Other",
+      "importance": 0.0
+    },
+    {
+      "feature": "gender_unknown",
+      "importance": 0.0
+    },
+    {
+      "feature": "category_Comedy",
+      "importance": 0.0
+    },
+    {
+      "feature": "category_Education",
+      "importance": 0.0
+    },
+    {
+      "feature": "category_Fashion",
+      "importance": 0.0
+    },
+    {
+      "feature": "category_Food",
+      "importance": 0.0
+    },
+    {
+      "feature": "category_Music",
+      "importance": 0.0
+    },
+    {
+      "feature": "category_Sports",
+      "importance": 0.0
+    },
+    {
+      "feature": "category_Travel",
+      "importance": 0.0
+    },
+    {
+      "feature": "category_unknown",
+      "importance": 0.0
+    },
+    {
+      "feature": "preferred_category_Education",
+      "importance": 0.0
+    },
+    {
+      "feature": "preferred_category_Fashion",
+      "importance": 0.0
+    },
+    {
+      "feature": "preferred_category_Food",
+      "importance": 0.0
+    },
+    {
+      "feature": "preferred_category_Music",
+      "importance": 0.0
+    },
+    {
+      "feature": "preferred_category_Sports",
+      "importance": 0.0
+    },
+    {
+      "feature": "preferred_category_Travel",
+      "importance": 0.0
+    },
+    {
+      "feature": "preferred_category_unknown",
+      "importance": 0.0
+    },
+    {
+      "feature": "day_period_night",
+      "importance": 0.0
+    },
+    {
+      "feature": "day_period_morning",
+      "importance": 0.0
+    },
+    {
+      "feature": "day_period_evening",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_2",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_3",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_5",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_6",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_8",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_9",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_10",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_11",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_12",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_13",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_14",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_18",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_19",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_20",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_21",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_22",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_24",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_25",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_26",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_27",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_29",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_30",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_31",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_32",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_33",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_35",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_37",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_39",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_41",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_42",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_43",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_44",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_45",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_46",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_47",
+      "importance": 0.0
+    },
+    {
+      "feature": "user_emb_49",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_0",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_1",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_2",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_3",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_4",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_5",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_6",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_7",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_8",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_9",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_10",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_11",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_12",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_13",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_14",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_15",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_16",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_17",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_18",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_19",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_20",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_21",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_22",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_23",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_24",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_25",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_26",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_27",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_28",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_29",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_31",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_32",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_33",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_35",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_36",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_37",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_38",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_39",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_40",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_41",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_43",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_44",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_45",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_46",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_48",
+      "importance": 0.0
+    },
+    {
+      "feature": "video_emb_49",
+      "importance": 0.0
+    }
+  ],
+  "validation_metrics": {
+    "auc": 0.5833465288668586,
+    "average_precision": 0.12184997069891836,
+    "accuracy": 0.90825,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "brier_score": 0.08382764807947805
+  },
+  "test_metrics": {
+    "auc": 0.5763590206130219,
+    "average_precision": 0.11472492937436221,
+    "accuracy": 0.9105,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "brier_score": 0.08213931966524599
+  },
+  "versions": {
+    "numpy": "2.5.4",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.7.2",
+    "lightgbm": "4.7.0",
+    "joblib": "1.6.0"
+  },
+  "artifact_sha256": {
+    "feature_columns.pkl": "a89f66e25cb1deec15364ee5369c66625a1ab0f595f9f017bbb93f121f34f3e7",
+    "ranking_model.pkl": "ed20eec51316c61701aeb1fe46cfbeabba2f2ff17d673b4fe9b41c95092a7790",
+    "encoders.pkl": "94a35c03c081e4561bba14989b6af54d7e039032b37a3301828d66034b4093a9",
+    "best_model_lightgbm_optuna.pkl": "6708fd8de608a32b0a92c20cb1850e54d63d1a71f14897fb8cdd3bbc88fdc278",
+    "scalers.pkl": "800857ba26d9f38ca089818d75ea45ba6c37f2a11960f0b813752810a87284e5",
+    "embeddings.pkl": "316db1435cc16109245abbfa803f76857b8890372966fd21ef720cf11e7bdf2b",
+    "feature_engineer.joblib": "cbea4caf4c458589c2ed82b425d897771f7166bdc3813593bd5e8e2f2103cbd0"
+  }
+}

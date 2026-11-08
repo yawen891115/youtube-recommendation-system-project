@@ -1,221 +1,271 @@
-from datetime import datetime
-from pathlib import Path
+"""Validated asynchronous prediction, recommendation, and monitoring endpoints."""
 
-import joblib
-import numpy as np
-import pandas as pd
-from fastapi import FastAPI # Flask / Django
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
-from typing import List, Optional
+import hashlib
+import json
+import logging
+import os
+import time
+from collections import deque
+from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+from typing import Annotated
 
-# ============================================
-# 1. 全局变量：模型和特征列
-# ============================================
-model = None
-feature_columns = None
+from fastapi import FastAPI, HTTPException, Request, Response
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    CollectorRegistry,
+    Counter,
+    Histogram,
+    generate_latest,
+)
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
+from starlette.concurrency import run_in_threadpool
 
-# ============================================
-# 2. 请求和响应的数据模型（Pydantic）
-# ============================================
+from .cache import CacheStore
+from .inference import RecommendationService
+
+logger = logging.getLogger(__name__)
+UserID = Annotated[str, Field(pattern=r"^user_\d+$", max_length=64)]
+VideoID = Annotated[str, Field(pattern=r"^video_\d+$", max_length=64)]
+
+
 class PredictionRequest(BaseModel):
-    """预测请求体：API 收到这个 JSON 后会自动校验字段"""
-    user_id: str = Field(..., description="用户ID，如 user_123")
-    video_id: str = Field(..., description="视频ID，如 video_456")
-    watch_time: float = Field(..., ge=0, description="观看时长（秒）")
-    hour_of_day: Optional[int] = Field(None, ge=0, le=23, description="小时（0-23）")
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    user_id: UserID
+    video_id: VideoID
+    watch_time: float = Field(ge=0, le=3600)
+    hour_of_day: int | None = Field(default=None, ge=0, le=23)
+    timestamp: AwareDatetime | None = None
+
+    @model_validator(mode="after")
+    def consistent_hour(self):
+        if self.timestamp is not None and self.hour_of_day is not None:
+            if self.timestamp.astimezone(timezone.utc).hour != self.hour_of_day:
+                raise ValueError("hour_of_day must match timestamp in UTC")
+        return self
+
+    def record(self):
+        # The default represents the current UTC minute, making short-lived cache keys stable.
+        when = self.timestamp or datetime.now(timezone.utc).replace(second=0, microsecond=0)
+        when = when.astimezone(timezone.utc)
+        if self.hour_of_day is not None:
+            when = when.replace(hour=self.hour_of_day)
+        return {
+            "user_id": self.user_id,
+            "video_id": self.video_id,
+            "watch_time": self.watch_time,
+            "timestamp": when.isoformat(),
+        }
 
 
 class PredictionResponse(BaseModel):
-    """预测响应体：返回给前端的字段"""
-    user_id: str
-    video_id: str
     probability: float
     confidence: str
+    cold_start: bool
     model_version: str
     response_time_ms: float
-    timestamp: datetime
+    timestamp: str
+    cached: bool
+    confidence_basis: str = "uncalibrated distance from 0.5"
 
 
-class BatchPredictionRequest(BaseModel):
-    """批量预测请求体：包含多条 prediction 请求"""
-    requests: List[PredictionRequest]
+class BatchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    instances: list[PredictionRequest] = Field(min_length=1, max_length=256)
 
 
-# ============================================
-# 3. 启动时加载模型
-# ============================================
-def load_models():
-    """加载训练好的模型文件，失败则用 DummyClassifier 兜底"""
-    global model, feature_columns
-    models_dir = Path("models")
-    models_dir.mkdir(exist_ok=True)
-
-    # 加载模型文件（best_model_xxx.pkl）
-    model_files = list(models_dir.glob("best_model_*.pkl"))
-    if model_files:
-        model = joblib.load(model_files[0])
-    else:
-        # 没有训练好的模型，用随机猜测的虚拟模型
-        from sklearn.dummy import DummyClassifier
-        model = DummyClassifier(strategy="uniform", random_state=42)
-
-    # 加载特征列名（与训练时一致）
-    feature_columns_path = models_dir / "feature_columns.pkl"
-    if feature_columns_path.exists():
-        import pickle
-        with open(feature_columns_path, "rb") as f:
-            feature_columns = pickle.load(f)
-    else:
-        feature_columns = ["watch_time", "hour_of_day", "day_of_week"]
+class RecommendationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    user_id: UserID
+    top_k: int = Field(default=10, ge=1, le=50)
+    timestamp: AwareDatetime | None = None
 
 
-load_models()
-
-# ============================================
-# 4. 创建 FastAPI 应用
-# ============================================
-app = FastAPI(title="YouTube Shorts Recommendation API")
-
-# CORS：允许前端跨域调用
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-# ============================================
-# 5. 辅助函数
-# ============================================
-def preprocess_request(request: PredictionRequest) -> pd.DataFrame:
-    """把请求转成模型需要的 DataFrame，缺失的特征列填 0"""
-    now = datetime.now()
-    data = {
-        "watch_time": [request.watch_time],
-        "hour_of_day": [request.hour_of_day or now.hour],
-        "day_of_week": [now.weekday()],
-        "duration_sec": [60],
-        "age": [25],
-        "completion_rate": [min(request.watch_time / 60, 1.0)],
-    }
-    df = pd.DataFrame(data)
-    # 补齐所有训练时的特征列
-    for col in feature_columns:
-        if col not in df.columns:
-            df[col] = 0
-    return df.reindex(columns=feature_columns, fill_value=0)
-
-
-def get_confidence(prob: float) -> str:
-    """根据概率值判断置信度：离 0.5 越远越自信"""
-    if prob > 0.8 or prob < 0.2:
-        return "high"
-    elif prob > 0.6 or prob < 0.4:
-        return "medium"
-    return "low"
-
-
-# ============================================
-# 6. API 路由（4 个接口）
-# ============================================
-
-# 接口 1：健康检查
-# 看模型是否正常加载了
-@app.get("/health")
-def health():
-    """检查服务是否正常运行"""
-    return {
-        "status": "healthy" if model else "degraded",
-        "model_loaded": model is not None,
-        "timestamp": datetime.now().isoformat(),
-    }
-
-
-# 接口 2：单条预测
-@app.post("/predict", response_model=PredictionResponse)
-def predict(request: PredictionRequest): 
-    """根据用户ID、视频ID、观看时长预测是否点赞"""
-    import time
-    start = time.time()
-
-    # 把请求转成 DataFrame
-    df = preprocess_request(request)
-
-    # 模型推理：取点赞（正类）的概率
-    if hasattr(model, "predict_proba"):
-        prob = float(model.predict_proba(df)[0][1])
-    else:
-        prob = float(model.predict(df)[0])
-    prob = float(np.clip(prob, 0, 1))  # 限制在 [0, 1] 范围
-
-# 展示给前端的东西
-    return PredictionResponse(
-        user_id=request.user_id,
-        video_id=request.video_id,
-        probability=prob,
-        confidence=get_confidence(prob),
-        model_version="1.0.0",
-        response_time_ms=(time.time() - start) * 1000, #响应时间
-        timestamp=datetime.now(),
+def create_app(service=None, cache=None, model_dir=None, rate_limit=None):
+    cache = cache or CacheStore(os.getenv("REDIS_URL"))
+    limit = rate_limit if rate_limit is not None else int(os.getenv("REQUESTS_PER_MINUTE", "120"))
+    registry = CollectorRegistry()
+    requests_metric = Counter(
+        "recommendation_http_requests_total",
+        "HTTP requests",
+        ["route", "status"],
+        registry=registry,
     )
+    latency = Histogram(
+        "recommendation_http_duration_seconds", "HTTP latency", ["route"], registry=registry
+    )
+    cache_hits = Counter(
+        "recommendation_cache_hits_total", "Prediction cache hits", registry=registry
+    )
+    predictions_metric = Counter(
+        "recommendation_predictions_total", "Instances scored", registry=registry
+    )
+    events = deque(maxlen=1000)
 
+    @asynccontextmanager
+    async def lifespan(app):
+        app.state.service = service
+        if app.state.service is None:
+            try:
+                app.state.service = await run_in_threadpool(
+                    RecommendationService, model_dir or os.getenv("MODEL_DIR", "models")
+                )
+            except Exception:
+                logger.exception("Model loading failed; prediction endpoints will return 503")
+        await cache.ping()
+        yield
+        await cache.close()
 
-# 接口 3：批量预测
-# 在单条预测的基础上加上一层for循环
-@app.post("/predict/batch")
-def predict_batch(request: BatchPredictionRequest):
-    """一次性预测多条，单条失败不影响其他条"""
-    import time
-    start = time.time()
-    results = []
+    app = FastAPI(title="YouTube Shorts Recommendation API", version="1.0.0", lifespan=lifespan)
 
-    for req in request.requests:
+    def get_service():
+        loaded = app.state.service
+        if loaded is None:
+            raise HTTPException(503, "Model unavailable. Run python -m src.train first.")
+        return loaded
+
+    async def check_limit(request):
+        client = request.client.host if request.client else "unknown"
+        if not await cache.allow(client, limit):
+            raise HTTPException(
+                429,
+                "Request limit exceeded",
+                headers={"Retry-After": str(60 - int(time.time()) % 60)},
+            )
+
+    @app.middleware("http")
+    async def observe(request: Request, call_next):
+        start = time.perf_counter()
+        status = 500
         try:
-            df = preprocess_request(req)
-            if hasattr(model, "predict_proba"):
-                prob = float(model.predict_proba(df)[0][1])
-            else:
-                prob = 0.5
-            prob = float(np.clip(prob, 0, 1))
-            results.append({
-                "user_id": req.user_id,
-                "video_id": req.video_id,
-                "probability": prob,
-                "confidence": get_confidence(prob),
-            })
-        except Exception as e:
-            # 错误隔离：单条失败时返回错误信息，其他条继续
-            results.append({
-                "user_id": req.user_id,
-                "video_id": req.video_id,
-                "error": str(e),
-            })
+            response = await call_next(request)
+            status = response.status_code
+            return response
+        finally:
+            route = getattr(request.scope.get("route"), "path", "unmatched")
+            elapsed = time.perf_counter() - start
+            requests_metric.labels(route, str(status)).inc()
+            latency.labels(route).observe(elapsed)
+            if route not in ["/metrics", "/monitoring", "/health"]:
+                events.append(
+                    {
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "route": route,
+                        "status": status,
+                        "latency_ms": round(elapsed * 1000, 3),
+                    }
+                )
+            logger.info("request route=%s status=%s latency_ms=%.3f", route, status, elapsed * 1000)
 
-    return {
-        "results": results,
-        "batch_size": len(request.requests),
-        "response_time_ms": (time.time() - start) * 1000,
-        "timestamp": datetime.now().isoformat(),
-    }
+    @app.get("/health")
+    async def health(response: Response):
+        ready = app.state.service is not None
+        if not ready:
+            response.status_code = 503
+        return {
+            "status": "ok" if ready else "not_ready",
+            "model_loaded": ready,
+            "cache_backend": cache.backend,
+        }
+
+    @app.get("/model/info")
+    async def model_info():
+        loaded = get_service()
+        return {
+            key: loaded.metadata[key]
+            for key in [
+                "model_version",
+                "model_name",
+                "feature_columns",
+                "training_cutoff",
+                "embedding_cutoff",
+                "feature_importance",
+                "validation_metrics",
+                "test_metrics",
+            ]
+        } | {
+            "confidence_basis": "heuristic, uncalibrated",
+            "ranking_excludes_observed_watch_features": True,
+        }
+
+    async def score(instances):
+        loaded = get_service()
+        start = time.perf_counter()
+        records = [instance.record() for instance in instances]
+        keys = [
+            "prediction:"
+            + hashlib.sha256(
+                json.dumps([loaded.version, record], sort_keys=True).encode()
+            ).hexdigest()
+            for record in records
+        ]
+        values = [await cache.get(key) for key in keys]
+        hits = [value is not None for value in values]
+        missing = [index for index, value in enumerate(values) if value is None]
+        if missing:
+            computed = await run_in_threadpool(
+                loaded.predict, [records[index] for index in missing]
+            )
+            for index, value in zip(missing, computed):
+                values[index] = value
+                await cache.set(keys[index], value)
+        predictions_metric.inc(len(records))
+        cache_hits.inc(sum(hits))
+        elapsed = (time.perf_counter() - start) * 1000
+        now = datetime.now(timezone.utc).isoformat()
+        return [
+            PredictionResponse(
+                **value,
+                model_version=loaded.version,
+                response_time_ms=round(elapsed, 3),
+                timestamp=now,
+                cached=hit,
+            )
+            for value, hit in zip(values, hits)
+        ]
+
+    @app.post("/predict", response_model=PredictionResponse)
+    async def predict(payload: PredictionRequest, request: Request):
+        await check_limit(request)
+        return (await score([payload]))[0]
+
+    @app.post("/predict/batch")
+    async def predict_batch(payload: BatchRequest, request: Request):
+        await check_limit(request)
+        return {"predictions": await score(payload.instances), "count": len(payload.instances)}
+
+    @app.post("/recommend")
+    async def recommend(payload: RecommendationRequest, request: Request):
+        await check_limit(request)
+        loaded = get_service()
+        when = payload.timestamp or datetime.now(timezone.utc)
+        try:
+            videos = await run_in_threadpool(loaded.recommend, payload.user_id, payload.top_k, when)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+        return {
+            "user_id": payload.user_id,
+            "model_version": loaded.version,
+            "recommendations": videos,
+            "candidate_limit": 300,
+        }
+
+    @app.get("/metrics")
+    async def metrics():
+        return Response(generate_latest(registry), headers={"Content-Type": CONTENT_TYPE_LATEST})
+
+    @app.get("/monitoring")
+    async def monitoring():
+        rows = list(events)
+        return {
+            "window_requests": len(rows),
+            "error_rate": sum(row["status"] >= 400 for row in rows) / max(len(rows), 1),
+            "mean_latency_ms": sum(row["latency_ms"] for row in rows) / max(len(rows), 1),
+            "cache_backend": cache.backend,
+            "events": rows,
+        }
+
+    return app
 
 
-# 接口 4：模型信息
-@app.get("/model/info")
-def model_info():
-    """返回当前加载的模型元信息"""
-    return {
-        "model_type": type(model).__name__ if model else None,
-        "feature_count": len(feature_columns) if feature_columns else 0,
-        "features": feature_columns[:10] if feature_columns else [],
-        "status": "loaded" if model else "not loaded",
-    }
-
-
-# ============================================
-# 7. 启动入口
-# ============================================
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("api:app", host="127.0.0.1", port=8000, reload=True)
+app = create_app()

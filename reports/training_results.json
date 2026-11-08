@@ -1,0 +1,136 @@
+{
+  "seed": 42,
+  "data": {
+    "users": 10000,
+    "videos": 10000,
+    "interactions": 100000,
+    "positive_rate": 0.09304,
+    "share_rate": 0.02316,
+    "mean_watch_seconds": 33.514605146763955,
+    "first_interaction": "2024-01-01T00:05:18+00:00",
+    "last_interaction": "2024-11-30T23:59:26+00:00",
+    "rewatch_rows": 0,
+    "interactions_before_upload": 9469,
+    "category_counts": {
+      "Travel": 1311,
+      "Gaming": 1279,
+      "Education": 1255,
+      "Comedy": 1240,
+      "Sports": 1230,
+      "Music": 1229,
+      "Food": 1229,
+      "Fashion": 1227
+    },
+    "missing_cells": {
+      "users": 0,
+      "videos": 0,
+      "interactions": 0
+    }
+  },
+  "split": {
+    "train": {
+      "rows": 64000,
+      "positive_rate": 0.09446875,
+      "start": "2024-01-01T00:05:18+00:00",
+      "end": "2024-08-02T22:33:10+00:00"
+    },
+    "validation": {
+      "rows": 16000,
+      "positive_rate": 0.09175,
+      "start": "2024-08-02T22:36:41+00:00",
+      "end": "2024-09-25T00:03:11+00:00"
+    },
+    "test": {
+      "rows": 20000,
+      "positive_rate": 0.0895,
+      "start": "2024-09-25T00:04:14+00:00",
+      "end": "2024-11-30T23:59:26+00:00"
+    }
+  },
+  "features": 167,
+  "validation_models": {
+    "logistic_regression": {
+      "auc": 0.5751013829481644,
+      "average_precision": 0.11743175911634171,
+      "accuracy": 0.5875,
+      "precision": 0.11413533834586466,
+      "recall": 0.5170299727520435,
+      "f1": 0.18699186991869918,
+      "brier_score": 0.24455228176180974,
+      "training_seconds": 0.8775003480000123
+    },
+    "random_forest": {
+      "auc": 0.5548146681456915,
+      "average_precision": 0.12035791228792495,
+      "accuracy": 0.8375625,
+      "precision": 0.1498452012383901,
+      "recall": 0.164850136239782,
+      "f1": 0.15698994485890366,
+      "brier_score": 0.1924877852009629,
+      "training_seconds": 7.0213115379999635
+    },
+    "gradient_boosting": {
+      "auc": 0.5315582082874888,
+      "average_precision": 0.10210104156139252,
+      "accuracy": 0.9066875,
+      "precision": 0.0967741935483871,
+      "recall": 0.0020435967302452314,
+      "f1": 0.004002668445630421,
+      "brier_score": 0.09309221593289574,
+      "training_seconds": 1.9549147210000228
+    },
+    "lightgbm": {
+      "auc": 0.5791544273991589,
+      "average_precision": 0.1267843847975331,
+      "accuracy": 0.90825,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "brier_score": 0.11502745041915342,
+      "training_seconds": 0.986726181999984
+    },
+    "lightgbm_optuna": {
+      "auc": 0.5833465288668586,
+      "average_precision": 0.12184997069891836,
+      "accuracy": 0.90825,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "brier_score": 0.08382764807947805
+    }
+  },
+  "selected_model": "lightgbm_optuna",
+  "test": {
+    "auc": 0.5763590206130219,
+    "average_precision": 0.11472492937436221,
+    "accuracy": 0.9105,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "brier_score": 0.08213931966524599
+  },
+  "ranking_test": {
+    "auc": 0.5112652204725134,
+    "average_precision": 0.09268973770674996,
+    "accuracy": 0.9105,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "brier_score": 0.09874977141649674
+  },
+  "optuna": {
+    "trials": 5,
+    "best_params": {
+      "num_leaves": 22,
+      "learning_rate": 0.021482547433667266,
+      "feature_fraction": 0.6232334448672797,
+      "min_child_samples": 90
+    },
+    "best_validation_auc": 0.5833465288668586
+  },
+  "data_sha256": {
+    "users.csv": "70d6d2066af4dfad7bd9da9ea2b0a2cef8df87064628f29090619ddd86c299f5",
+    "videos.csv": "4818191586ad94a4cd5d7b83bb8834a91f5e76f8673ed5117086acc2124cb905",
+    "interactions_cleaned.csv": "ae5ac4d635584c2c182a83f9f2d0e6243a14777a8870f9f93c6ec494fa941227"
+  }
+}

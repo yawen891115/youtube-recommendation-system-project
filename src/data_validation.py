@@ -1,133 +1,136 @@
-from pathlib import Path #找文件用的
-import sys # 改python的设置
-import logging #日志工具
+"""Validate the supplied user, video, and interaction tables."""
+
+import json
+from dataclasses import dataclass
+from pathlib import Path
 
 import pandas as pd
-import pandera as pa #数据校验专用库
+from pandera.pandas import Check, Column, DataFrameSchema
 
-from pandera import Column, Check, DataFrameSchema #DataFrameSchema是 pandera 提供的类,用来定义一整张表的规则
-
-#配置日志
-logging.basicConfig( #全局日志，basicConfig — 给日志系统做全局设置
-    level = logging.INFO,
-    format="%(asctime)s-%(levelname)s-%(message)s"
-    #YYYY-MM-DD HH:MM:SS
+CATEGORIES = ["Comedy", "Education", "Fashion", "Food", "Gaming", "Music", "Sports", "Travel"]
+USERS_SCHEMA = DataFrameSchema(
+    {
+        "user_id": Column(str, Check.str_matches(r"^user_\d+$"), unique=True),
+        "age": Column(int, Check.in_range(13, 99)),
+        "gender": Column(str, Check.isin(["M", "F", "Other"])),
+        "preferred_category": Column(str, Check.isin(CATEGORIES)),
+        "join_date": Column(str),
+    },
+    coerce=True,
+)
+VIDEOS_SCHEMA = DataFrameSchema(
+    {
+        "video_id": Column(str, Check.str_matches(r"^video_\d+$"), unique=True),
+        "creator_id": Column(int, Check.ge(0)),
+        "category": Column(str, Check.isin(CATEGORIES)),
+        "duration_sec": Column(float, Check.gt(0)),
+        "view_count": Column(int, Check.ge(0)),
+        "upload_date": Column(str),
+    },
+    coerce=True,
+)
+INTERACTIONS_SCHEMA = DataFrameSchema(
+    {
+        "user_id": Column(str, Check.str_matches(r"^user_\d+$")),
+        "video_id": Column(str, Check.str_matches(r"^video_\d+$")),
+        "watch_time": Column(
+            float, [Check.ge(0), Check(lambda s: s.map(lambda x: x < float("inf")).all())]
+        ),
+        "liked": Column(int, Check.isin([0, 1])),
+        "shared": Column(int, Check.isin([0, 1])),
+        "timestamp": Column(str),
+    },
+    coerce=True,
 )
 
-logger = logging.getLogger(__name__) # 拿一个日志小助手来用
 
-USERS_SCHEMA = DataFrameSchema({ #用DataFrameSchema给users写一份规则书
-    #{}this is dictionary, key是列名，value是列的规则
-    "user_id": Column( #Column(...) 是 pandera 提供的类,专门描述user_id这一列的规则
-        str, # user_id这一列的数据类型是str
-        checks=[ #[]is a list,里面可以放很多个Check对象,每个Check对象都是一个规则
-            Check( #规则1
-                lambda s: s.str.startswith("user_"), #是一个匿名函数，s是一个输入的Series对象，s.str.startswith("user_")是返回值，返回一个布尔型Series，表示每个元素是否以"user_"开头
-                error="user_id 必须以 user_开头" #error是遇到false的情况报错信息里自己写的解释
-            ),
-            Check( #规则2
-                lambda s: s.nunique() == len(s), #s.nunique()这一列里有多少个不重复的值(number of unique)，和len比较，输出bool
-                error="user_id 不能重复"
+@dataclass
+class DataBundle:
+    users: pd.DataFrame
+    videos: pd.DataFrame
+    interactions: pd.DataFrame
+
+
+def load_data(data_dir="data"):
+    root = Path(data_dir)
+    frames = []
+    for file, schema in [
+        ("users.csv", USERS_SCHEMA),
+        ("videos.csv", VIDEOS_SCHEMA),
+        ("interactions_cleaned.csv", INTERACTIONS_SCHEMA),
+    ]:
+        frame = schema.validate(pd.read_csv(root / file), lazy=True)
+        if frame.duplicated().any():
+            raise ValueError(f"{file} contains duplicate rows")
+        frames.append(frame)
+    users, videos, interactions = frames
+    for frame, column in [
+        (users, "join_date"),
+        (videos, "upload_date"),
+        (interactions, "timestamp"),
+    ]:
+        frame[column] = pd.to_datetime(frame[column], utc=True, errors="raise")
+    if not interactions.user_id.isin(users.user_id).all():
+        raise ValueError("Interactions contain unknown user IDs")
+    if not interactions.video_id.isin(videos.video_id).all():
+        raise ValueError("Interactions contain unknown video IDs")
+    interactions = interactions.sort_values(
+        ["timestamp", "user_id", "video_id"], kind="stable"
+    ).reset_index(drop=True)
+    return DataBundle(users, videos, interactions)
+
+
+def describe_data(bundle):
+    interactions = bundle.interactions
+    merged = interactions.merge(
+        bundle.videos[["video_id", "duration_sec", "upload_date"]], on="video_id"
+    )
+    return {
+        "users": len(bundle.users),
+        "videos": len(bundle.videos),
+        "interactions": len(interactions),
+        "positive_rate": float(interactions.liked.mean()),
+        "share_rate": float(interactions.shared.mean()),
+        "mean_watch_seconds": float(interactions.watch_time.mean()),
+        "first_interaction": interactions.timestamp.min().isoformat(),
+        "last_interaction": interactions.timestamp.max().isoformat(),
+        "rewatch_rows": int((merged.watch_time > merged.duration_sec).sum()),
+        "interactions_before_upload": int((merged.timestamp < merged.upload_date).sum()),
+        "category_counts": bundle.videos.category.value_counts().to_dict(),
+        "missing_cells": {
+            name: int(frame.isna().sum().sum()) for name, frame in vars(bundle).items()
+        },
+    }
+
+
+def chronological_split(frame):
+    ordered = frame.sort_values(["timestamp", "user_id", "video_id"], kind="stable").reset_index(
+        drop=True
+    )
+    first, second = int(len(ordered) * 0.64), int(len(ordered) * 0.80)
+    if min(first, second - first, len(ordered) - second) < 2:
+        raise ValueError("Not enough examples for a chronological 64/16/20 split")
+    # Keep equal timestamps on one side of each boundary.
+    times = ordered.timestamp.to_numpy()
+    first = int(times.searchsorted(times[first], side="left"))
+    second = int(times.searchsorted(times[second], side="left"))
+    splits = {
+        "train": ordered.iloc[:first].copy(),
+        "validation": ordered.iloc[first:second].copy(),
+        "test": ordered.iloc[second:].copy(),
+    }
+    for name, split in splits.items():
+        if split.empty or split.liked.nunique() < 2:
+            raise ValueError(
+                f"{name} needs both label classes; do not shuffle future events into training"
             )
-        ]
-    ),
-    "age": Column(
-        int,
-        checks=[
-            Check(
-                lambda s: s>= 13,
-                error="age不能小于13"
-            ),
-            Check(
-                lambda s: s<100,
-                error="age不能大于100"
-            )
-        ]
-
-    ),
-    "gender": Column(
-        str,
-        checks=Check(lambda s: s.isin(["M", "F", "Other"]))
-        #checks=Check.isin(["M", "F", "Other"])自己继续写
-    ),
-    "preferred_category": 
-
-})
-
-VIDEOS_SCHEMA = DataFrameSchema({
-
-INTERACTIONS_SCHEMA = DataFrameSchema({
+    return splits
 
 
+if __name__ == "__main__":
+    import argparse
 
-
-
-#主校验函数
-def validate_data(data_dir="data"):
-
-    data_path = Path(data_dir)
-
-    try:
-        #开始记录日志
-        logger.info("开始加载数据") # info级别的日志输出
-
-        #读取三张表格
-        users_df = pd.read_csv(data_path / "users.csv"). # /在这里是拼接路径的意思
-        videos_df = pd.read_csv(data_path / "videos.csv")
-        interactions_df = pd.read_csv(data_path / "interactions.csv")
-
-        interactions_df["timestamp"] = pd.to_datetime( #CSV 里的时间(比如 "2026-01-15 10:30:00")读进来默认是字符串,不能做时间比较、排序、计算
-            interactions_df["timestamp"],
-            errors = "raise" #日期校验，时间匹配规则
-        )
-        #errors="raise"表示:如果有任何一行转换失败(比如格式乱了),直接抛错。其他选项:"coerce"(转不了就变 NaT)、"ignore"(转不了保留原样)。
-
-        USERS_SCHEMA.validate(users_df)
-        VIDEOS_SCHEMA.validate(videos_df)
-        INTERACTIONS_SCHEMA.validate(interactions_df)
-        logger.info("结构校验通过")
-        #任何一个不通过 → 抛 SchemaError → 跳到 except 块。三个都通过 → 打印"结构校验通过"
-
-        #检测缺失值和重复行
-        for name, frame in [    #tuple写法：列表里每个元素是一个元组,每次循环,name拿到str,frame拿到对应的DataFrame
-            ("users", users_df),
-            ("videos", videos_df),
-            ("interactions", interactions_df)
-        ]:
-        
-            missing = frame.isna().sum().sum() #整张表一共有多少个缺失值
-            duplicates = frame.duplicated().sum()#整张表一共有多少行重复行
-
-            logger.info(
-                "%s:缺失值=%d,重复行=%d",
-                name, missing, duplicates
-            )
-
-        logger.info(
-            "点赞率=%.4f, 分享率=%.4f, 平均观看=%.2f", # %.4f先保留四位小数再加百分号
-            #把下面的三个参数依次传给上面这个字符串里的三个占位符
-            interactions_df["liked"].mean(), # 参数1
-            interactions_df["shared"].mean(), # 参数2
-            interactions_df["watch_time"].mean() # 参数3
-        )
-
-    except (
-        FileNotFoundError, # 文件不存在
-        pd.errors.SchemaError, # 数据不符合Schema要求
-        ValueError, 
-        TypeError) as exc:
-        
-        
-
-
-#python数据类型：str,int,float,bool
-#pandas一维数组series，二维DataFrame
-#df.dropna() 一行中只要有一个nan就把整行删掉
-#df.dropna("all") 一整行都是缺失值把这行删掉
-#df.dropna(subset=["col1","col2"]) 只要这两列都是缺失值就删掉
-#df.dropna(axis=1) 删除整列
-#df.dropna(axis=0) 删除整行
-
-#df.fillna()保留所有行，把缺失的地方补上合理的值，数据量不变
-
-#删除重复行 df.drop_duplicates()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data-dir", default="data")
+    args = parser.parse_args()
+    print(json.dumps(describe_data(load_data(args.data_dir)), indent=2))

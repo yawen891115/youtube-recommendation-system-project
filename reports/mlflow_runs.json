@@ -1,0 +1,99 @@
+[
+  {
+    "run_id": "9727b777f6cc40aa9be1be623d8155df",
+    "model": "logistic_regression",
+    "validation": {
+      "auc": 0.5751013829481644,
+      "average_precision": 0.11743175911634171,
+      "accuracy": 0.5875,
+      "precision": 0.11413533834586466,
+      "recall": 0.5170299727520435,
+      "f1": 0.18699186991869918,
+      "brier_score": 0.24455228176180974,
+      "training_seconds": 0.8775003480000123
+    }
+  },
+  {
+    "run_id": "6fd372269ee5465ab58a2e385945ee49",
+    "model": "random_forest",
+    "validation": {
+      "auc": 0.5548146681456915,
+      "average_precision": 0.12035791228792495,
+      "accuracy": 0.8375625,
+      "precision": 0.1498452012383901,
+      "recall": 0.164850136239782,
+      "f1": 0.15698994485890366,
+      "brier_score": 0.1924877852009629,
+      "training_seconds": 7.0213115379999635
+    }
+  },
+  {
+    "run_id": "943d4ff396994df09424418b04a8be42",
+    "model": "gradient_boosting",
+    "validation": {
+      "auc": 0.5315582082874888,
+      "average_precision": 0.10210104156139252,
+      "accuracy": 0.9066875,
+      "precision": 0.0967741935483871,
+      "recall": 0.0020435967302452314,
+      "f1": 0.004002668445630421,
+      "brier_score": 0.09309221593289574,
+      "training_seconds": 1.9549147210000228
+    }
+  },
+  {
+    "run_id": "739d34acc32141728d0a03f3847c4c25",
+    "model": "lightgbm",
+    "validation": {
+      "auc": 0.5791544273991589,
+      "average_precision": 0.1267843847975331,
+      "accuracy": 0.90825,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "brier_score": 0.11502745041915342,
+      "training_seconds": 0.986726181999984
+    }
+  },
+  {
+    "run_id": "3f6bad0478264a1599ac5b15e03f5d87",
+    "model": "lightgbm_optuna",
+    "validation": {
+      "auc": 0.5833465288668586,
+      "average_precision": 0.12184997069891836,
+      "accuracy": 0.90825,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "brier_score": 0.08382764807947805
+    },
+    "params": {
+      "num_leaves": 22,
+      "learning_rate": 0.021482547433667266,
+      "feature_fraction": 0.6232334448672797,
+      "min_child_samples": 90
+    }
+  },
+  {
+    "run_id": "63c281b7df264bc5a0f99343e61cac01",
+    "model": "lightgbm_optuna",
+    "test": {
+      "auc": 0.5763590206130219,
+      "average_precision": 0.11472492937436221,
+      "accuracy": 0.9105,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "brier_score": 0.08213931966524599
+    },
+    "ranking_test": {
+      "auc": 0.5112652204725134,
+      "average_precision": 0.09268973770674996,
+      "accuracy": 0.9105,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "brier_score": 0.09874977141649674
+    }
+  }
+]

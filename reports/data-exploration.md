@@ -1,15 +1,22 @@
 # Data exploration
 
-The supplied dataset contains 10,000 users, 10,000 videos and 100,000 interactions.
+The dataset holds 100,000 real plays by 4,088 users over a catalog of 7,583 short videos (5,821 of them played; 44 primary-tag categories), from 2022-04-09T03:59:02.423000+00:00 to 2022-05-08T14:30:29.614000+00:00. Source: KuaiRand-Pure (Kuaishou), CC BY-SA 4.0; the subset rules are in `data/README.md`.
 
-Like rate: 9.30%. Share rate: 2.32%. Mean watch duration: 33.51 seconds.
+Like rate: 3.09%. Share rate: 0.18%. Long-view rate: 71.97%. Mean watch duration: 47.4 seconds. Plays longer than the video (rewatch loops): 33,345. Plays dated before upload: 0.
 
-Observation window: 2024-01-01T00:05:18+00:00 to 2024-11-30T23:59:26+00:00.
+## Structure a pre-watch ranker can use (training split)
 
-The three raw tables contain no missing cells or duplicate rows and all interaction foreign keys resolve. Rewatch observations are retained; completion rate is capped at one. There are 9,469 interactions dated before the catalog upload date. Raw rows are preserved; negative video age is clipped to zero. This inconsistency limits realism. Catalog metadata is treated as a static snapshot; its historical availability cannot be verified. The supplied materials do not establish that this is live YouTube traffic.
+| Check | Value |
+| --- | ---: |
+| Share of plays on the top 1% of videos | 19.2% |
+| Video popularity rank correlation, first vs second half of training | 0.220 |
+| Plays of a creator the user had already played | 1.7% |
+| Mean share of a user's plays in their top category (users with 5+ plays) | 38.3% |
+| Test plays by users seen in training | 91.6% |
+| Test plays of videos seen in training | 96.8% |
 
 ## Split distributions
 
-- train: 64,000 rows, 9.45% positive.
-- validation: 16,000 rows, 9.18% positive.
-- test: 20,000 rows, 8.95% positive.
+- train: 64,000 plays, 3.08% liked, 2022-04-09T03:59:02.423000+00:00 to 2022-04-15T09:12:58.080000+00:00.
+- validation: 16,000 plays, 3.54% liked, 2022-04-15T09:13:20.752000+00:00 to 2022-04-21T14:37:29.387000+00:00.
+- test: 20,000 plays, 2.78% liked, 2022-04-21T14:39:34.634000+00:00 to 2022-05-08T14:30:29.614000+00:00.

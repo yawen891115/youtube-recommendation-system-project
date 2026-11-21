@@ -2,10 +2,12 @@
 
 The exact supplied English specification is preserved in [assignment-original.en.md](assignment-original.en.md). The table below maps its requirements to the consolidated implementation and verification. This is a completion record, not a claim of a course grade.
 
+**Dataset change (v2).** The supplied tables were synthetic: which video a user watched was uniformly random and the only pre-watch signal was a planted category-preference match, so no ranker could beat a simple rule. Version 2 keeps the same schema-driven pipeline but uses a reproducible 100,000-play subset of the real KuaiRand-Pure logs (Kuaishou, CC BY-SA 4.0); see [data/README.md](../data/README.md). User demographics (age, gender, declared category) do not exist in that source and were replaced by its real user attributes.
+
 | Assignment requirement | Implementation / deliverable | Verification |
 | --- | --- | --- |
-| Load users, videos and interactions | `src/data_validation.py`; complete original CSV files | Schema, foreign-key and duplicate tests; full-data validation |
-| Integrity, missing cells and anomalies | Pandera schemas; `describe_data`; dataset report | Invalid age, duration, infinite watch and unknown IDs rejected; timestamp anomaly counted |
+| Load users, videos and interactions | `src/data_validation.py`; KuaiRand-Pure subset built by `scripts/prepare_kuairand.py` | Schema, foreign-key and duplicate tests; full-data validation |
+| Integrity, missing cells and anomalies | Pandera schemas; `describe_data`; dataset report | Invalid activity level, duration, infinite watch and unknown IDs rejected; plays before upload counted |
 | Data scale / distributions | `reports/data-exploration.md`, `training_results.json`, plot | Counts and distributions generated from actual raw files |
 | Calendar, recency and day-period features | `FeatureEngineer.transform` | Timestamp-based transformation tests |
 | Historical user watch, activity, likes and shares | Prefix history aggregates | Current/future label changes cannot affect prior features |
@@ -22,6 +24,7 @@ The exact supplied English specification is preserved in [assignment-original.en
 | Optuna search and best parameters | Seeded study over leaves, learning rate, feature fraction and leaf sample count | Trial CSV, best parameters and validation AUC |
 | Saved best model and feature columns | `models/best_model_*.pkl`, `feature_columns.pkl` | SHA-256 checked at API startup |
 | MLflow tracking | `experiments/mlflow.db`, JSON export | Recorded runs, parameters and metrics |
+| Pre-watch ranking (v2 addition) | `src/ranking.py`, `src/train_ranker.py`: candidate lists, LightGBM LambdaRank, six baselines, NDCG@10 / HR@10 / MRR | Metric checked against scikit-learn; paired bootstrap test; leakage and point-in-time tests |
 | Health, model info, single and batch APIs | `src/api.py` | Success, consistency and model-unavailable tests |
 | Pydantic request/response validation | Strict IDs, finite watch time, timezone, bounds | Invalid input, missing/oversized batch tests |
 | Redis caching and rate limit | `src/cache.py`; model-aware keys and bounded fallback | FakeRedis behavior tests and real Redis in Compose smoke |
@@ -39,10 +42,10 @@ The exact supplied English specification is preserved in [assignment-original.en
 
 **Chronology and stratification.** The assignment asks for strict chronological splits and stratified sampling simultaneously. Equal class ratios generally cannot be forced while preserving every row and strict time boundaries. This implementation keeps the time split and all rows, reports prevalence for each partition, and uses imbalance handling during training. It does not randomly move future events into earlier partitions.
 
-**Feature availability.** User/video statistics query only events strictly before the prediction time. Validation and test history is frozen at the training cutoff. SVD is fitted on the first 10% of training history, with zero embeddings for those warmup rows. Static user/video catalog metadata is assumed to be available; the supplied snapshot does not allow historical metadata availability to be proven. Aggregate catalog `view_count` is not used as a historical feature because its as-of date is unknown.
+**Feature availability.** User/video statistics query only plays strictly before the prediction time. Learned inputs (priors, scaler, SVD basis, co-watch counts) use training plays only; the history that features read is the play log up to each request, as an online feature store would serve it (the ranking report also shows results with histories frozen at the training cutoff). SVD is fitted on the first 10% of training history, with zero embeddings for those warmup rows. Static user/video catalog metadata is assumed to be available; the supplied snapshot does not allow historical metadata availability to be proven. Aggregate catalog `view_count` is not used as a historical feature because its as-of date is unknown.
 
 **Prediction versus recommendation.** The assignment's request includes observed `watch_time`, so `/predict` estimates engagement after observation. The additional `/recommend` model removes watch time, normalized watch time, completion and watch/popularity ratio before ranking. Reported offline AUC is not an online recommendation uplift measurement.
 
 **Output size.** The required CSV is included with lossless XZ compression and a Parquet copy. Decompressing the supplied `.csv.xz` produces the CSV without retraining. The stale 196 MB derived file from the archives is superseded by features generated from the current code.
 
-**Deployment verification.** This development environment does not provide a Docker daemon or NVIDIA GPU. Local verification covers training, API, Streamlit and automated tests; the real CPU Compose stack is exercised in GitHub Actions. The separate CUDA training image is provided for the assignment's GPU scenario, with CPU training as the documented default.
+**Deployment verification.** The v2 development environment could not pull images from Docker Hub and has no NVIDIA GPU. All five services (API, Redis, MLflow, Prometheus, Streamlit) were run natively with the same versions and configuration, and `docker compose config` and `promtool check` validate the Compose and Prometheus files; the real CPU Compose stack is exercised in GitHub Actions. The separate CUDA training image is provided for the assignment's GPU scenario, with CPU training as the documented default.

@@ -5,6 +5,10 @@ services:
     environment:
       REDIS_URL: redis://redis:6379/0
       REQUESTS_PER_MINUTE: ${REQUESTS_PER_MINUTE:-120}
+      CACHE_TTL_SECONDS: ${CACHE_TTL_SECONDS:-60}
+      CANDIDATE_LIMIT: ${CANDIDATE_LIMIT:-300}
+      # The bundled data ends in May 2022: requests without a timestamp replay this time.
+      REPLAY_TIME: ${REPLAY_TIME:-2022-05-08T16:00:00Z}
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
@@ -24,6 +28,7 @@ services:
     command: ["streamlit", "run", "streamlit_app.py", "--server.address=0.0.0.0", "--server.port=8501", "--browser.gatherUsageStats=false"]
     environment:
       API_BASE_URL: http://api:8000
+      REPLAY_TIME: ${REPLAY_TIME:-2022-05-08T16:00:00Z}
     ports:
       - "127.0.0.1:8501:8501"
     depends_on:
@@ -64,6 +69,7 @@ services:
     image: prom/prometheus:v3.13.5
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/rules.yml:/etc/prometheus/rules.yml:ro
       - prometheus-data:/prometheus
     ports:
       - "127.0.0.1:9090:9090"

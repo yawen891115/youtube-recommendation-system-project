@@ -1,4 +1,4 @@
-"""Validate the supplied user, video, and interaction tables."""
+"""Validate the user, video, and interaction tables (KuaiRand-Pure subset, project schema)."""
 
 import json
 from dataclasses import dataclass
@@ -7,14 +7,29 @@ from pathlib import Path
 import pandas as pd
 from pandera.pandas import Check, Column, DataFrameSchema
 
-CATEGORIES = ["Comedy", "Education", "Fashion", "Food", "Gaming", "Music", "Sports", "Travel"]
+ACTIVITY_LEVELS = [
+    "full_active",
+    "high_active",
+    "middle_active",
+    "low_active",
+    "single_low_active",
+    "2_14_day_new",
+    "30day_retention",
+    "day_new",
+    "UNKNOWN",
+]
+FLAG = Check.isin([0, 1])
 USERS_SCHEMA = DataFrameSchema(
     {
         "user_id": Column(str, Check.str_matches(r"^user_\d+$"), unique=True),
-        "age": Column(int, Check.in_range(13, 99)),
-        "gender": Column(str, Check.isin(["M", "F", "Other"])),
-        "preferred_category": Column(str, Check.isin(CATEGORIES)),
-        "join_date": Column(str),
+        "user_active_degree": Column(str, Check.isin(ACTIVITY_LEVELS)),
+        "is_lowactive_period": Column(int, FLAG),
+        "is_live_streamer": Column(int, FLAG),
+        "is_video_author": Column(int, FLAG),
+        "follow_user_num": Column(int, Check.ge(0)),
+        "fans_user_num": Column(int, Check.ge(0)),
+        "friend_user_num": Column(int, Check.ge(0)),
+        "register_days": Column(int, Check.ge(0)),
     },
     coerce=True,
 )
@@ -22,9 +37,10 @@ VIDEOS_SCHEMA = DataFrameSchema(
     {
         "video_id": Column(str, Check.str_matches(r"^video_\d+$"), unique=True),
         "creator_id": Column(int, Check.ge(0)),
-        "category": Column(str, Check.isin(CATEGORIES)),
+        "category": Column(str, Check.str_matches(r"^tag_(\d+|unknown)$")),
         "duration_sec": Column(float, Check.gt(0)),
-        "view_count": Column(int, Check.ge(0)),
+        "video_type": Column(str),
+        "upload_type": Column(str),
         "upload_date": Column(str),
     },
     coerce=True,
@@ -36,8 +52,9 @@ INTERACTIONS_SCHEMA = DataFrameSchema(
         "watch_time": Column(
             float, [Check.ge(0), Check(lambda s: s.map(lambda x: x < float("inf")).all())]
         ),
-        "liked": Column(int, Check.isin([0, 1])),
-        "shared": Column(int, Check.isin([0, 1])),
+        "liked": Column(int, FLAG),
+        "shared": Column(int, FLAG),
+        "long_view": Column(int, FLAG),
         "timestamp": Column(str),
     },
     coerce=True,
@@ -65,7 +82,6 @@ def load_data(data_dir="data"):
         frames.append(frame)
     users, videos, interactions = frames
     for frame, column in [
-        (users, "join_date"),
         (videos, "upload_date"),
         (interactions, "timestamp"),
     ]:
@@ -91,12 +107,15 @@ def describe_data(bundle):
         "interactions": len(interactions),
         "positive_rate": float(interactions.liked.mean()),
         "share_rate": float(interactions.shared.mean()),
+        "long_view_rate": float(interactions.long_view.mean()),
         "mean_watch_seconds": float(interactions.watch_time.mean()),
+        "videos_played": int(interactions.video_id.nunique()),
+        "categories": int(bundle.videos.category.nunique()),
         "first_interaction": interactions.timestamp.min().isoformat(),
         "last_interaction": interactions.timestamp.max().isoformat(),
         "rewatch_rows": int((merged.watch_time > merged.duration_sec).sum()),
         "interactions_before_upload": int((merged.timestamp < merged.upload_date).sum()),
-        "category_counts": bundle.videos.category.value_counts().to_dict(),
+        "category_counts": bundle.videos.category.value_counts().head(10).to_dict(),
         "missing_cells": {
             name: int(frame.isna().sum().sum()) for name, frame in vars(bundle).items()
         },

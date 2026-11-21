@@ -1,0 +1,1604 @@
+{
+  "protocol": {
+    "split": "chronological 64K / 16K / 20K plays (train / validation / test)",
+    "query": "one first-time play (user had never played the video before)",
+    "candidates_per_query": 100,
+    "negatives": "uniform from videos already uploaded at query time, excluding every video the user ever played",
+    "train_negatives_per_query": 10,
+    "validation_queries_for_selection": 6000,
+    "features": "pre-watch only, point-in-time over the full play log (each request sees only earlier plays; learned inputs fit on training plays); observed watch features removed",
+    "relevance": "played = 1, sampled = 0",
+    "metric": "NDCG@10 (primary), HR@10, MRR, AUC; mean over queries",
+    "confidence_intervals": "95% percentile bootstrap over test queries",
+    "significance": "paired bootstrap over test queries, 10,000 resamples, two-sided",
+    "model_selection": "validation NDCG@10 only; test scored once",
+    "seed": 42
+  },
+  "queries": {
+    "train": 63678,
+    "validation": 6000,
+    "test": 19942
+  },
+  "first_play_queries_available": {
+    "train": 63678,
+    "validation": 15935,
+    "test": 19942
+  },
+  "candidate_rows": {
+    "train": 700458,
+    "validation": 600000,
+    "test": 1994200
+  },
+  "ranking_features": 235,
+  "models": {
+    "random": {
+      "family": "Reference",
+      "description": "Random order (chance level)",
+      "validation": {
+        "ndcg@10": 0.045858031702352815,
+        "hr@10": 0.10216666666666667,
+        "mrr": 0.05171988019385916,
+        "auc": 0.49994612794612797
+      },
+      "test": {
+        "ndcg@10": 0.0454330244750821,
+        "hr@10": 0.0999899709156554,
+        "mrr": 0.051840904378109634,
+        "auc": 0.4990568608560786
+      },
+      "test_ci": {
+        "ndcg@10": {
+          "mean": 0.0454330244750821,
+          "low": 0.04338791098817853,
+          "high": 0.04748728418365026
+        },
+        "hr@10": {
+          "mean": 0.0999899709156554,
+          "low": 0.09607737438571859,
+          "high": 0.10420469361147328
+        },
+        "mrr": {
+          "mean": 0.051840904378109634,
+          "low": 0.050206161183832226,
+          "high": 0.0534870973367993
+        },
+        "auc": {
+          "mean": 0.4990568608560786,
+          "low": 0.4950064910462563,
+          "high": 0.5028498808159826
+        }
+      },
+      "params": {},
+      "training_seconds": null
+    },
+    "popularity": {
+      "family": "Heuristic",
+      "description": "Most-played videos in the training window",
+      "validation": {
+        "ndcg@10": 0.3547620283344673,
+        "hr@10": 0.5968333333333333,
+        "mrr": 0.29960788141282374,
+        "auc": 0.8685833333333334
+      },
+      "test": {
+        "ndcg@10": 0.3397228719104329,
+        "hr@10": 0.5829405275298365,
+        "mrr": 0.2851340629742652,
+        "auc": 0.8651265437445358
+      },
+      "test_ci": {
+        "ndcg@10": {
+          "mean": 0.3397228719104329,
+          "low": 0.33471047565063455,
+          "high": 0.3446692123318657
+        },
+        "hr@10": {
+          "mean": 0.5829405275298365,
+          "low": 0.576069351118243,
+          "high": 0.5900122856283221
+        },
+        "mrr": {
+          "mean": 0.2851340629742652,
+          "low": 0.2803987875774117,
+          "high": 0.2897695920293127
+        },
+        "auc": {
+          "mean": 0.8651265437445358,
+          "low": 0.8627556150209346,
+          "high": 0.8675734187223757
+        }
+      },
+      "params": {},
+      "training_seconds": null
+    },
+    "trending_24h": {
+      "family": "Heuristic",
+      "description": "Most-played videos in the last 24 hours of training",
+      "validation": {
+        "ndcg@10": 0.37217310104960744,
+        "hr@10": 0.5925,
+        "mrr": 0.3190001641475015,
+        "auc": 0.8036759259259257
+      },
+      "test": {
+        "ndcg@10": 0.3246996648467331,
+        "hr@10": 0.5233677665229165,
+        "mrr": 0.27718224647895395,
+        "auc": 0.7378632883848008
+      },
+      "test_ci": {
+        "ndcg@10": {
+          "mean": 0.3246996648467331,
+          "low": 0.31928141238612306,
+          "high": 0.32972790573145316
+        },
+        "hr@10": {
+          "mean": 0.5233677665229165,
+          "low": 0.5164953364757797,
+          "high": 0.530339233777956
+        },
+        "mrr": {
+          "mean": 0.27718224647895395,
+          "low": 0.27199964548279676,
+          "high": 0.2819317274638221
+        },
+        "auc": {
+          "mean": 0.7378632883848008,
+          "low": 0.7342842602132041,
+          "high": 0.7414900243534532
+        }
+      },
+      "params": {},
+      "training_seconds": null
+    },
+    "category_history": {
+      "family": "Content-based",
+      "description": "Recency-weighted share of the user's plays in the video's category",
+      "validation": {
+        "ndcg@10": 0.09066328756546056,
+        "hr@10": 0.19,
+        "mrr": 0.08705022719278016,
+        "auc": 0.6301557239057239
+      },
+      "test": {
+        "ndcg@10": 0.08588403847494518,
+        "hr@10": 0.18288035302376893,
+        "mrr": 0.08237493932483471,
+        "auc": 0.621306333822631
+      },
+      "test_ci": {
+        "ndcg@10": {
+          "mean": 0.08588403847494518,
+          "low": 0.082901015385039,
+          "high": 0.08870078003921375
+        },
+        "hr@10": {
+          "mean": 0.18288035302376893,
+          "low": 0.1773643566342393,
+          "high": 0.18829605856985257
+        },
+        "mrr": {
+          "mean": 0.08237493932483471,
+          "low": 0.08003799350632379,
+          "high": 0.08464757925477945
+        },
+        "auc": {
+          "mean": 0.621306333822631,
+          "low": 0.6175679483127332,
+          "high": 0.6250088324322354
+        }
+      },
+      "params": {},
+      "training_seconds": null
+    },
+    "item_knn": {
+      "family": "Collaborative filtering",
+      "description": "Item-item cosine similarity to the user's plays",
+      "validation": {
+        "ndcg@10": 0.4618062108344969,
+        "hr@10": 0.7198333333333333,
+        "mrr": 0.3941182119527937,
+        "auc": 0.890300505050505
+      },
+      "test": {
+        "ndcg@10": 0.4185738707897795,
+        "hr@10": 0.6753585397653195,
+        "mrr": 0.35319832416476804,
+        "auc": 0.8722768250147649
+      },
+      "test_ci": {
+        "ndcg@10": {
+          "mean": 0.4185738707897795,
+          "low": 0.41352945609509373,
+          "high": 0.4238719077566552
+        },
+        "hr@10": {
+          "mean": 0.6753585397653195,
+          "low": 0.6685889078327149,
+          "high": 0.6814800421221543
+        },
+        "mrr": {
+          "mean": 0.35319832416476804,
+          "low": 0.34827601348012344,
+          "high": 0.3586771553744264
+        },
+        "auc": {
+          "mean": 0.8722768250147649,
+          "low": 0.8696443423301309,
+          "high": 0.875045479111646
+        }
+      },
+      "params": {},
+      "training_seconds": null
+    },
+    "svd_mf": {
+      "family": "Collaborative filtering",
+      "description": "Rank-50 truncated SVD of the user x video matrix",
+      "validation": {
+        "ndcg@10": 0.3699805147655502,
+        "hr@10": 0.592,
+        "mrr": 0.31455970548715373,
+        "auc": 0.7652272727272726
+      },
+      "test": {
+        "ndcg@10": 0.30769027747171296,
+        "hr@10": 0.5106308294052753,
+        "mrr": 0.2606088535061579,
+        "auc": 0.7227890174435155
+      },
+      "test_ci": {
+        "ndcg@10": {
+          "mean": 0.30769027747171296,
+          "low": 0.3030993528266366,
+          "high": 0.3125774429128054
+        },
+        "hr@10": {
+          "mean": 0.5106308294052753,
+          "low": 0.5042109617891887,
+          "high": 0.517653695717581
+        },
+        "mrr": {
+          "mean": 0.2606088535061579,
+          "low": 0.2561767739532995,
+          "high": 0.265125596126602
+        },
+        "auc": {
+          "mean": 0.7227890174435155,
+          "low": 0.7183777335586332,
+          "high": 0.7276535665551311
+        }
+      },
+      "params": {
+        "dimensions": 50
+      },
+      "training_seconds": 0.14192155499995351
+    },
+    "logistic_regression": {
+      "family": "Linear",
+      "description": "Pointwise logistic regression on the ranker's pre-watch features",
+      "validation": {
+        "ndcg@10": 0.4981769410903201,
+        "hr@10": 0.7413333333333333,
+        "mrr": 0.43282272291842827,
+        "auc": 0.8889478114478114
+      },
+      "test": {
+        "ndcg@10": 0.42049220265604514,
+        "hr@10": 0.6251629726205997,
+        "mrr": 0.367415628379259,
+        "auc": 0.823571184718512
+      },
+      "test_ci": {
+        "ndcg@10": {
+          "mean": 0.42049220265604514,
+          "low": 0.4151742953947903,
+          "high": 0.4264852671587899
+        },
+        "hr@10": {
+          "mean": 0.6251629726205997,
+          "low": 0.6184923778958982,
+          "high": 0.6317370374084846
+        },
+        "mrr": {
+          "mean": 0.367415628379259,
+          "low": 0.3620860694028316,
+          "high": 0.3733528867392007
+        },
+        "auc": {
+          "mean": 0.823571184718512,
+          "low": 0.8203053754879048,
+          "high": 0.8266868489326116
+        }
+      },
+      "params": {
+        "C": 1.0
+      },
+      "training_seconds": 13.834401849000187
+    },
+    "lightgbm_lambdarank": {
+      "family": "Tree ensemble (learning to rank)",
+      "description": "LightGBM LambdaRank on watch-history features and 50-D SVD embeddings",
+      "validation": {
+        "ndcg@10": 0.5275703272881208,
+        "hr@10": 0.7831666666666667,
+        "mrr": 0.4582760860101856,
+        "auc": 0.9245193602693603
+      },
+      "test": {
+        "ndcg@10": 0.48272705160465956,
+        "hr@10": 0.7444589308996089,
+        "mrr": 0.41355346180903513,
+        "auc": 0.9119917457596727
+      },
+      "test_ci": {
+        "ndcg@10": {
+          "mean": 0.48272705160465956,
+          "low": 0.47762948798627136,
+          "high": 0.4880348682658729
+        },
+        "hr@10": {
+          "mean": 0.7444589308996089,
+          "low": 0.7383913348711263,
+          "high": 0.7504274897201885
+        },
+        "mrr": {
+          "mean": 0.41355346180903513,
+          "low": 0.4086667882388479,
+          "high": 0.41928053830167994
+        },
+        "auc": {
+          "mean": 0.9119917457596727,
+          "low": 0.9099942484720841,
+          "high": 0.9140578511015277
+        }
+      },
+      "params": {
+        "learning_rate": 0.05407232133324004,
+        "num_leaves": 47,
+        "min_child_samples": 253,
+        "colsample_bytree": 0.3976457024564293,
+        "subsample": 0.6460723242676091,
+        "reg_lambda": 0.029204338471814112,
+        "subsample_freq": 1,
+        "best_iteration": 280
+      },
+      "training_seconds": 871.1955025829998
+    }
+  },
+  "final_model": "lightgbm_lambdarank",
+  "best_baseline": "logistic_regression",
+  "significance_vs_best_baseline": {
+    "mean_difference": 0.06223484894861446,
+    "low": 0.059014468495127606,
+    "high": 0.06555333287484338,
+    "p_value": 0.0001,
+    "resamples": 10000,
+    "queries": 19942
+  },
+  "ablations": {
+    "pointwise_binary_objective": {
+      "removed_features": 0,
+      "validation_ndcg@10": 0.528068780688941,
+      "test_ndcg@10": 0.48503996955570894,
+      "test_ndcg@10_ci": {
+        "mean": 0.48503996955570894,
+        "low": 0.4802171088659863,
+        "high": 0.49026971119989654
+      },
+      "difference_vs_final": {
+        "mean_difference": -0.0023129179510493455,
+        "low": -0.004208616808953023,
+        "high": -0.00048054963731356367,
+        "p_value": 0.0144,
+        "resamples": 10000,
+        "queries": 19942
+      }
+    },
+    "without_user_watch_history": {
+      "removed_features": 28,
+      "validation_ndcg@10": 0.4043005951110073,
+      "test_ndcg@10": 0.37992896521680297,
+      "test_ndcg@10_ci": {
+        "mean": 0.37992896521680297,
+        "low": 0.3750162857466172,
+        "high": 0.38512768728401087
+      },
+      "difference_vs_final": {
+        "mean_difference": 0.10279808638785667,
+        "low": 0.09847981750077044,
+        "high": 0.1070717106018223,
+        "p_value": 0.0001,
+        "resamples": 10000,
+        "queries": 19942
+      }
+    },
+    "without_svd_embeddings": {
+      "removed_features": 101,
+      "validation_ndcg@10": 0.5257406486195415,
+      "test_ndcg@10": 0.47756659711132543,
+      "test_ndcg@10_ci": {
+        "mean": 0.47756659711132543,
+        "low": 0.47243861972053147,
+        "high": 0.482832623371286
+      },
+      "difference_vs_final": {
+        "mean_difference": 0.005160454493334152,
+        "low": 0.003119186277042416,
+        "high": 0.007206827945504622,
+        "p_value": 0.0001,
+        "resamples": 10000,
+        "queries": 19942
+      }
+    }
+  },
+  "frozen_history_sensitivity": {
+    "description": "same trained models; test features read training plays only (histories frozen at the training cutoff)",
+    "test_ndcg@10": {
+      "random": 0.0454330244750821,
+      "popularity": 0.3047971824224344,
+      "trending_24h": 0.2968321482559851,
+      "category_history": 0.07862480728571947,
+      "item_knn": 0.3645551958235259,
+      "svd_mf": 0.30769027747171296,
+      "logistic_regression": 0.013951389746924633,
+      "lightgbm_lambdarank": 0.4176729343339245
+    },
+    "strongest_baseline_on_frozen_test": "item_knn",
+    "final_vs_strongest_frozen_baseline": {
+      "mean_difference": 0.053117738510398665,
+      "low": 0.049797536897198146,
+      "high": 0.05650077854235312,
+      "p_value": 0.0001,
+      "resamples": 10000,
+      "queries": 19942
+    }
+  },
+  "optuna": {
+    "trials": 12,
+    "best_params": {
+      "learning_rate": 0.05407232133324004,
+      "num_leaves": 47,
+      "min_child_samples": 253,
+      "colsample_bytree": 0.3976457024564293,
+      "subsample": 0.6460723242676091,
+      "reg_lambda": 0.029204338471814112,
+      "subsample_freq": 1
+    },
+    "best_validation_ndcg@10": 0.5275703272881208,
+    "trial_log": [
+      {
+        "trial": 0,
+        "validation_ndcg@10": 0.5271577845020738,
+        "best_iteration": 240,
+        "seconds": 68.9005998560001,
+        "learning_rate": 0.047377279007281566,
+        "num_leaves": 122,
+        "min_child_samples": 298,
+        "colsample_bytree": 0.7190609389379257,
+        "subsample": 0.5780093202212182,
+        "subsample_freq": 1,
+        "reg_lambda": 0.004207053950287938
+      },
+      {
+        "trial": 1,
+        "validation_ndcg@10": 0.5244446214169255,
+        "best_iteration": 437,
+        "seconds": 116.55539469399992,
+        "learning_rate": 0.022861967752626437,
+        "num_leaves": 112,
+        "min_child_samples": 249,
+        "colsample_bytree": 0.7956508044572318,
+        "subsample": 0.5102922471479012,
+        "subsample_freq": 1,
+        "reg_lambda": 7.579479953348009
+      },
+      {
+        "trial": 2,
+        "validation_ndcg@10": 0.5229147469762849,
+        "best_iteration": 101,
+        "seconds": 34.52492523899991,
+        "learning_rate": 0.1359792484318226,
+        "num_leaves": 38,
+        "min_child_samples": 89,
+        "colsample_bytree": 0.4283831568974037,
+        "subsample": 0.6521211214797689,
+        "subsample_freq": 1,
+        "reg_lambda": 0.12561043700013558
+      },
+      {
+        "trial": 3,
+        "validation_ndcg@10": 0.5275703272881208,
+        "best_iteration": 280,
+        "seconds": 71.72931487799997,
+        "learning_rate": 0.05407232133324004,
+        "num_leaves": 47,
+        "min_child_samples": 253,
+        "colsample_bytree": 0.3976457024564293,
+        "subsample": 0.6460723242676091,
+        "subsample_freq": 1,
+        "reg_lambda": 0.029204338471814112
+      },
+      {
+        "trial": 4,
+        "validation_ndcg@10": 0.5239925192466033,
+        "best_iteration": 213,
+        "seconds": 56.533306068,
+        "learning_rate": 0.057161021316138726,
+        "num_leaves": 103,
+        "min_child_samples": 96,
+        "colsample_bytree": 0.6599641068895281,
+        "subsample": 0.7962072844310213,
+        "subsample_freq": 1,
+        "reg_lambda": 0.0015339162591163618
+      },
+      {
+        "trial": 5,
+        "validation_ndcg@10": 0.5254318574069579,
+        "best_iteration": 199,
+        "seconds": 43.070364616999996,
+        "learning_rate": 0.0810167556265935,
+        "num_leaves": 34,
+        "min_child_samples": 44,
+        "colsample_bytree": 0.9642198760773333,
+        "subsample": 0.9828160165372797,
+        "subsample_freq": 1,
+        "reg_lambda": 1.7123375973163988
+      },
+      {
+        "trial": 6,
+        "validation_ndcg@10": 0.522774278503696,
+        "best_iteration": 274,
+        "seconds": 55.19461064299958,
+        "learning_rate": 0.040331443383617174,
+        "num_leaves": 26,
+        "min_child_samples": 280,
+        "colsample_bytree": 0.6081067456177209,
+        "subsample": 0.5610191174223894,
+        "subsample_freq": 1,
+        "reg_lambda": 0.09565499215943825
+      },
+      {
+        "trial": 7,
+        "validation_ndcg@10": 0.5261983393248971,
+        "best_iteration": 423,
+        "seconds": 113.46640937200027,
+        "learning_rate": 0.021648036763001914,
+        "num_leaves": 117,
+        "min_child_samples": 118,
+        "colsample_bytree": 0.7637655990477874,
+        "subsample": 0.6558555380447055,
+        "subsample_freq": 1,
+        "reg_lambda": 0.12030178871154672
+      },
+      {
+        "trial": 8,
+        "validation_ndcg@10": 0.5240109073799702,
+        "best_iteration": 204,
+        "seconds": 47.83292682799993,
+        "learning_rate": 0.07042717610935736,
+        "num_leaves": 35,
+        "min_child_samples": 389,
+        "colsample_bytree": 0.8425929763527802,
+        "subsample": 0.9697494707820946,
+        "subsample_freq": 1,
+        "reg_lambda": 3.7958531426706403
+      },
+      {
+        "trial": 9,
+        "validation_ndcg@10": 0.5202102586426723,
+        "best_iteration": 144,
+        "seconds": 74.92913347500007,
+        "learning_rate": 0.07923735580813167,
+        "num_leaves": 119,
+        "min_child_samples": 53,
+        "colsample_bytree": 0.4371880036934016,
+        "subsample": 0.522613644455269,
+        "subsample_freq": 1,
+        "reg_lambda": 0.02001342062287998
+      },
+      {
+        "trial": 10,
+        "validation_ndcg@10": 0.5203236128545461,
+        "best_iteration": 56,
+        "seconds": 28.447154105999743,
+        "learning_rate": 0.17914021598528698,
+        "num_leaves": 68,
+        "min_child_samples": 183,
+        "colsample_bytree": 0.3125733129303738,
+        "subsample": 0.8259332753890892,
+        "subsample_freq": 1,
+        "reg_lambda": 0.8566301930727152
+      },
+      {
+        "trial": 11,
+        "validation_ndcg@10": 0.524819126392177,
+        "best_iteration": 323,
+        "seconds": 94.16236251500004,
+        "learning_rate": 0.038584622964119214,
+        "num_leaves": 85,
+        "min_child_samples": 318,
+        "colsample_bytree": 0.5558292417769721,
+        "subsample": 0.6494332957562885,
+        "subsample_freq": 1,
+        "reg_lambda": 0.002681949573302741
+      }
+    ]
+  },
+  "feature_importance": [
+    {
+      "feature": "cowatch_mean",
+      "gain": 429927.08657073975
+    },
+    {
+      "feature": "video_plays_24h",
+      "gain": 331806.7787666321
+    },
+    {
+      "feature": "video_watch_count",
+      "gain": 156092.66801166534
+    },
+    {
+      "feature": "cowatch_score",
+      "gain": 120751.37410926819
+    },
+    {
+      "feature": "video_recency_days",
+      "gain": 61965.893882751465
+    },
+    {
+      "feature": "user_watch_count",
+      "gain": 33916.93099832535
+    },
+    {
+      "feature": "video_age_days",
+      "gain": 31897.625757694244
+    },
+    {
+      "feature": "video_tenure_days",
+      "gain": 26503.17428445816
+    },
+    {
+      "feature": "user_cat_decayed_share",
+      "gain": 22408.26357269287
+    },
+    {
+      "feature": "interactions_per_day",
+      "gain": 17381.490502357483
+    },
+    {
+      "feature": "user_tenure_days",
+      "gain": 12433.330840587616
+    },
+    {
+      "feature": "video_popularity",
+      "gain": 12235.879618644714
+    },
+    {
+      "feature": "video_watch_std",
+      "gain": 11780.16771364212
+    },
+    {
+      "feature": "user_session_id",
+      "gain": 8503.867627620697
+    },
+    {
+      "feature": "user_watch_std",
+      "gain": 8449.324525356293
+    },
+    {
+      "feature": "video_cold_start",
+      "gain": 7411.602619171143
+    },
+    {
+      "feature": "video_watch_mean",
+      "gain": 6926.076700687408
+    },
+    {
+      "feature": "user_cat_watch_count",
+      "gain": 5601.528418540955
+    },
+    {
+      "feature": "video_emb_0",
+      "gain": 5080.046553134918
+    },
+    {
+      "feature": "user_creator_decayed_share",
+      "gain": 4839.408082008362
+    },
+    {
+      "feature": "user_cold_start",
+      "gain": 4767.878355979919
+    },
+    {
+      "feature": "user_recency_days",
+      "gain": 4412.1423163414
+    },
+    {
+      "feature": "user_creator_watch_count",
+      "gain": 4224.534130096436
+    },
+    {
+      "feature": "duration_sec",
+      "gain": 4068.5994601249695
+    },
+    {
+      "feature": "user_cat_decayed_completion",
+      "gain": 4027.5097422599792
+    },
+    {
+      "feature": "category_tag_39",
+      "gain": 3799.026400089264
+    },
+    {
+      "feature": "category_tag_3",
+      "gain": 3712.677128314972
+    },
+    {
+      "feature": "video_completion_mean",
+      "gain": 3680.717641353607
+    },
+    {
+      "feature": "user_watch_mean",
+      "gain": 3644.3664717674255
+    },
+    {
+      "feature": "video_emb_1",
+      "gain": 3527.154769420624
+    },
+    {
+      "feature": "user_cat_completion",
+      "gain": 3278.6201062202454
+    },
+    {
+      "feature": "user_cat_like_rate",
+      "gain": 2431.1621265411377
+    },
+    {
+      "feature": "engagement_rate",
+      "gain": 2202.548872947693
+    },
+    {
+      "feature": "video_long_view_rate",
+      "gain": 2005.8940229415894
+    },
+    {
+      "feature": "user_category_diversity",
+      "gain": 1972.5556063652039
+    },
+    {
+      "feature": "user_emb_0",
+      "gain": 1803.2503514289856
+    },
+    {
+      "feature": "user_completion_mean",
+      "gain": 1786.0747656822205
+    },
+    {
+      "feature": "register_days",
+      "gain": 1771.6607766151428
+    },
+    {
+      "feature": "video_liked_mean",
+      "gain": 1549.866536140442
+    },
+    {
+      "feature": "category_tag_20",
+      "gain": 1515.394504070282
+    },
+    {
+      "feature": "hour_weekend_interaction",
+      "gain": 1441.8143649101257
+    },
+    {
+      "feature": "video_emb_6",
+      "gain": 1412.0261058807373
+    },
+    {
+      "feature": "user_long_view_rate",
+      "gain": 1411.6090679168701
+    },
+    {
+      "feature": "friend_user_num",
+      "gain": 1395.7919073104858
+    },
+    {
+      "feature": "recency_days",
+      "gain": 1305.1246871948242
+    },
+    {
+      "feature": "follow_user_num",
+      "gain": 1184.4118361473083
+    },
+    {
+      "feature": "video_liked_sum",
+      "gain": 1170.8034114837646
+    },
+    {
+      "feature": "fans_user_num",
+      "gain": 1159.0191736221313
+    },
+    {
+      "feature": "day_of_week",
+      "gain": 956.3073053359985
+    },
+    {
+      "feature": "user_emb_6",
+      "gain": 852.9943480491638
+    },
+    {
+      "feature": "user_emb_3",
+      "gain": 849.2133111953735
+    },
+    {
+      "feature": "hour_of_day",
+      "gain": 844.7906789779663
+    },
+    {
+      "feature": "user_emb_10",
+      "gain": 825.1636414527893
+    },
+    {
+      "feature": "video_emb_7",
+      "gain": 812.3108749389648
+    },
+    {
+      "feature": "user_emb_16",
+      "gain": 811.685555934906
+    },
+    {
+      "feature": "user_emb_39",
+      "gain": 800.051760673523
+    },
+    {
+      "feature": "video_emb_3",
+      "gain": 799.2067885398865
+    },
+    {
+      "feature": "video_emb_4",
+      "gain": 760.7457499504089
+    },
+    {
+      "feature": "video_emb_13",
+      "gain": 758.7165575027466
+    },
+    {
+      "feature": "user_emb_23",
+      "gain": 754.5347118377686
+    },
+    {
+      "feature": "video_emb_15",
+      "gain": 739.0737113952637
+    },
+    {
+      "feature": "user_emb_4",
+      "gain": 736.5924563407898
+    },
+    {
+      "feature": "user_emb_1",
+      "gain": 715.4446172714233
+    },
+    {
+      "feature": "user_emb_9",
+      "gain": 699.2272624969482
+    },
+    {
+      "feature": "user_emb_35",
+      "gain": 686.9582281112671
+    },
+    {
+      "feature": "user_emb_49",
+      "gain": 679.6168394088745
+    },
+    {
+      "feature": "user_emb_38",
+      "gain": 679.542227268219
+    },
+    {
+      "feature": "user_emb_13",
+      "gain": 678.146740436554
+    },
+    {
+      "feature": "user_emb_2",
+      "gain": 673.2703018188477
+    },
+    {
+      "feature": "user_emb_36",
+      "gain": 668.0442886352539
+    },
+    {
+      "feature": "category_tag_7",
+      "gain": 656.7602348327637
+    },
+    {
+      "feature": "user_emb_45",
+      "gain": 655.7764897346497
+    },
+    {
+      "feature": "video_emb_2",
+      "gain": 645.0272464752197
+    },
+    {
+      "feature": "video_emb_40",
+      "gain": 640.6327319145203
+    },
+    {
+      "feature": "user_emb_17",
+      "gain": 638.5301818847656
+    },
+    {
+      "feature": "user_emb_25",
+      "gain": 631.1449799537659
+    },
+    {
+      "feature": "user_emb_19",
+      "gain": 628.5421199798584
+    },
+    {
+      "feature": "user_emb_8",
+      "gain": 628.3036575317383
+    },
+    {
+      "feature": "user_emb_26",
+      "gain": 623.582338809967
+    },
+    {
+      "feature": "video_emb_49",
+      "gain": 620.9871978759766
+    },
+    {
+      "feature": "user_emb_20",
+      "gain": 618.2023906707764
+    },
+    {
+      "feature": "user_emb_42",
+      "gain": 608.609091758728
+    },
+    {
+      "feature": "video_emb_11",
+      "gain": 598.7044019699097
+    },
+    {
+      "feature": "video_emb_20",
+      "gain": 596.3944892883301
+    },
+    {
+      "feature": "user_emb_41",
+      "gain": 589.7820196151733
+    },
+    {
+      "feature": "user_emb_30",
+      "gain": 585.1461310386658
+    },
+    {
+      "feature": "user_emb_43",
+      "gain": 583.7973008155823
+    },
+    {
+      "feature": "user_emb_15",
+      "gain": 582.6355924606323
+    },
+    {
+      "feature": "user_emb_27",
+      "gain": 575.6258025169373
+    },
+    {
+      "feature": "user_emb_44",
+      "gain": 571.4162836074829
+    },
+    {
+      "feature": "user_emb_7",
+      "gain": 569.6142630577087
+    },
+    {
+      "feature": "video_emb_27",
+      "gain": 560.0240812301636
+    },
+    {
+      "feature": "user_emb_48",
+      "gain": 559.9061307907104
+    },
+    {
+      "feature": "video_emb_36",
+      "gain": 555.9305553436279
+    },
+    {
+      "feature": "user_emb_29",
+      "gain": 555.2946600914001
+    },
+    {
+      "feature": "user_emb_5",
+      "gain": 551.2602801322937
+    },
+    {
+      "feature": "video_emb_30",
+      "gain": 543.5051093101501
+    },
+    {
+      "feature": "video_emb_29",
+      "gain": 540.9024801254272
+    },
+    {
+      "feature": "user_emb_14",
+      "gain": 539.7146558761597
+    },
+    {
+      "feature": "video_emb_18",
+      "gain": 531.0622577667236
+    },
+    {
+      "feature": "video_emb_10",
+      "gain": 528.0722126960754
+    },
+    {
+      "feature": "video_emb_43",
+      "gain": 527.5121212005615
+    },
+    {
+      "feature": "video_emb_22",
+      "gain": 523.3213768005371
+    },
+    {
+      "feature": "user_session_duration_minutes",
+      "gain": 522.9509224891663
+    },
+    {
+      "feature": "user_emb_24",
+      "gain": 519.924379825592
+    },
+    {
+      "feature": "video_emb_21",
+      "gain": 517.4947309494019
+    },
+    {
+      "feature": "user_emb_22",
+      "gain": 515.0381712913513
+    },
+    {
+      "feature": "user_emb_47",
+      "gain": 507.13212394714355
+    },
+    {
+      "feature": "video_emb_34",
+      "gain": 503.35450887680054
+    },
+    {
+      "feature": "video_emb_37",
+      "gain": 501.4433455467224
+    },
+    {
+      "feature": "user_emb_12",
+      "gain": 498.36970806121826
+    },
+    {
+      "feature": "video_emb_42",
+      "gain": 497.00000524520874
+    },
+    {
+      "feature": "video_emb_44",
+      "gain": 496.47575855255127
+    },
+    {
+      "feature": "user_emb_40",
+      "gain": 492.51014041900635
+    },
+    {
+      "feature": "video_emb_38",
+      "gain": 492.33106231689453
+    },
+    {
+      "feature": "user_emb_33",
+      "gain": 490.5037417411804
+    },
+    {
+      "feature": "video_emb_31",
+      "gain": 486.79138231277466
+    },
+    {
+      "feature": "user_emb_21",
+      "gain": 484.36076736450195
+    },
+    {
+      "feature": "video_emb_41",
+      "gain": 483.6614155769348
+    },
+    {
+      "feature": "video_emb_12",
+      "gain": 480.2380509376526
+    },
+    {
+      "feature": "video_emb_32",
+      "gain": 480.1839346885681
+    },
+    {
+      "feature": "category_tag_28",
+      "gain": 478.2908544540405
+    },
+    {
+      "feature": "video_emb_47",
+      "gain": 473.40292739868164
+    },
+    {
+      "feature": "user_emb_32",
+      "gain": 469.2616138458252
+    },
+    {
+      "feature": "video_emb_14",
+      "gain": 464.2648310661316
+    },
+    {
+      "feature": "category_tag_6",
+      "gain": 461.1224398612976
+    },
+    {
+      "feature": "video_emb_25",
+      "gain": 457.17393827438354
+    },
+    {
+      "feature": "video_emb_35",
+      "gain": 457.14249563217163
+    },
+    {
+      "feature": "video_emb_46",
+      "gain": 450.7441906929016
+    },
+    {
+      "feature": "user_emb_11",
+      "gain": 449.7484016418457
+    },
+    {
+      "feature": "video_emb_23",
+      "gain": 442.66215801239014
+    },
+    {
+      "feature": "category_tag_9",
+      "gain": 440.601122379303
+    },
+    {
+      "feature": "video_emb_28",
+      "gain": 437.629207611084
+    },
+    {
+      "feature": "user_emb_28",
+      "gain": 437.6131982803345
+    },
+    {
+      "feature": "user_liked_mean",
+      "gain": 436.13268852233887
+    },
+    {
+      "feature": "video_emb_26",
+      "gain": 436.08112049102783
+    },
+    {
+      "feature": "user_emb_37",
+      "gain": 426.0163297653198
+    },
+    {
+      "feature": "user_emb_18",
+      "gain": 419.9769778251648
+    },
+    {
+      "feature": "video_emb_5",
+      "gain": 415.6364588737488
+    },
+    {
+      "feature": "video_emb_24",
+      "gain": 397.25317192077637
+    },
+    {
+      "feature": "video_emb_16",
+      "gain": 393.9754104614258
+    },
+    {
+      "feature": "user_emb_31",
+      "gain": 389.3309693336487
+    },
+    {
+      "feature": "video_emb_8",
+      "gain": 383.04499101638794
+    },
+    {
+      "feature": "svd_affinity",
+      "gain": 380.73340940475464
+    },
+    {
+      "feature": "video_emb_45",
+      "gain": 379.97523021698
+    },
+    {
+      "feature": "video_emb_9",
+      "gain": 374.12773084640503
+    },
+    {
+      "feature": "video_emb_17",
+      "gain": 373.13238763809204
+    },
+    {
+      "feature": "upload_type_LongPicture",
+      "gain": 368.05736541748047
+    },
+    {
+      "feature": "is_weekend",
+      "gain": 357.6329984664917
+    },
+    {
+      "feature": "video_emb_19",
+      "gain": 351.33499813079834
+    },
+    {
+      "feature": "user_emb_34",
+      "gain": 339.95878982543945
+    },
+    {
+      "feature": "day_period_afternoon",
+      "gain": 332.47033166885376
+    },
+    {
+      "feature": "user_emb_46",
+      "gain": 327.7843689918518
+    },
+    {
+      "feature": "video_emb_48",
+      "gain": 321.31211280822754
+    },
+    {
+      "feature": "category_tag_29",
+      "gain": 320.3224425315857
+    },
+    {
+      "feature": "category_tag_15",
+      "gain": 299.25248289108276
+    },
+    {
+      "feature": "category_tag_22",
+      "gain": 283.6660919189453
+    },
+    {
+      "feature": "video_emb_33",
+      "gain": 281.60489797592163
+    },
+    {
+      "feature": "category_tag_18",
+      "gain": 269.85527896881104
+    },
+    {
+      "feature": "category_tag_19",
+      "gain": 251.82990026474
+    },
+    {
+      "feature": "upload_type_Web",
+      "gain": 251.42517042160034
+    },
+    {
+      "feature": "video_emb_39",
+      "gain": 216.49732303619385
+    },
+    {
+      "feature": "user_liked_sum",
+      "gain": 197.25883674621582
+    },
+    {
+      "feature": "day_period_evening",
+      "gain": 194.30716037750244
+    },
+    {
+      "feature": "user_active_degree_full_active",
+      "gain": 191.58930778503418
+    },
+    {
+      "feature": "upload_type_Kmovie",
+      "gain": 181.89989185333252
+    },
+    {
+      "feature": "upload_type_LongImport",
+      "gain": 181.554358959198
+    },
+    {
+      "feature": "user_session_length",
+      "gain": 181.06992769241333
+    },
+    {
+      "feature": "category_tag_unknown",
+      "gain": 160.12968158721924
+    },
+    {
+      "feature": "category_tag_30",
+      "gain": 147.670419216156
+    },
+    {
+      "feature": "category_tag_12",
+      "gain": 137.699049949646
+    },
+    {
+      "feature": "category_tag_2",
+      "gain": 137.10262060165405
+    },
+    {
+      "feature": "video_shared_mean",
+      "gain": 135.5638303756714
+    },
+    {
+      "feature": "category_tag_37",
+      "gain": 129.08502101898193
+    },
+    {
+      "feature": "upload_type_ShortImport",
+      "gain": 124.29012870788574
+    },
+    {
+      "feature": "category_tag_35",
+      "gain": 119.76675033569336
+    },
+    {
+      "feature": "category_tag_17",
+      "gain": 119.20686054229736
+    },
+    {
+      "feature": "video_type_NORMAL",
+      "gain": 113.47750949859619
+    },
+    {
+      "feature": "day_period_morning",
+      "gain": 107.69961929321289
+    },
+    {
+      "feature": "category_tag_26",
+      "gain": 106.08641147613525
+    },
+    {
+      "feature": "category_tag_13",
+      "gain": 103.38792085647583
+    },
+    {
+      "feature": "category_tag_42",
+      "gain": 101.85269165039062
+    },
+    {
+      "feature": "category_tag_1",
+      "gain": 99.08893013000488
+    },
+    {
+      "feature": "category_tag_11",
+      "gain": 96.37410068511963
+    },
+    {
+      "feature": "category_tag_10",
+      "gain": 91.4732494354248
+    },
+    {
+      "feature": "upload_type_PictureSet",
+      "gain": 91.3311996459961
+    },
+    {
+      "feature": "is_video_author",
+      "gain": 87.88478994369507
+    },
+    {
+      "feature": "category_tag_4",
+      "gain": 84.95762062072754
+    },
+    {
+      "feature": "video_type_AD",
+      "gain": 78.21900081634521
+    },
+    {
+      "feature": "upload_type_UNKNOWN",
+      "gain": 69.19271039962769
+    },
+    {
+      "feature": "user_active_degree_high_active",
+      "gain": 64.01543951034546
+    },
+    {
+      "feature": "user_active_degree_middle_active",
+      "gain": 61.82149887084961
+    },
+    {
+      "feature": "user_recent_engagement",
+      "gain": 59.330849170684814
+    },
+    {
+      "feature": "upload_type_ShareFromOtherApp",
+      "gain": 55.21773958206177
+    },
+    {
+      "feature": "is_live_streamer",
+      "gain": 49.51895999908447
+    },
+    {
+      "feature": "category_tag_36",
+      "gain": 40.75504016876221
+    },
+    {
+      "feature": "category_tag_8",
+      "gain": 36.494858741760254
+    },
+    {
+      "feature": "category_tag_14",
+      "gain": 34.54220008850098
+    },
+    {
+      "feature": "upload_type_ShortCamera",
+      "gain": 34.00721979141235
+    },
+    {
+      "feature": "category_tag_62",
+      "gain": 31.185490608215332
+    },
+    {
+      "feature": "category_tag_34",
+      "gain": 24.947699546813965
+    },
+    {
+      "feature": "category_tag_16",
+      "gain": 23.624279975891113
+    },
+    {
+      "feature": "upload_type_LongCamera",
+      "gain": 22.08180046081543
+    },
+    {
+      "feature": "user_shared_mean",
+      "gain": 21.408080101013184
+    },
+    {
+      "feature": "day_period_night",
+      "gain": 18.291500091552734
+    },
+    {
+      "feature": "category_tag_27",
+      "gain": 18.220600128173828
+    },
+    {
+      "feature": "category_tag_25",
+      "gain": 16.443970203399658
+    },
+    {
+      "feature": "video_shared_sum",
+      "gain": 15.826399803161621
+    },
+    {
+      "feature": "category_tag_5",
+      "gain": 8.903889656066895
+    },
+    {
+      "feature": "month",
+      "gain": 0.0
+    },
+    {
+      "feature": "is_lowactive_period",
+      "gain": 0.0
+    },
+    {
+      "feature": "user_shared_sum",
+      "gain": 0.0
+    },
+    {
+      "feature": "user_active_degree_low_active",
+      "gain": 0.0
+    },
+    {
+      "feature": "user_active_degree_single_low_active",
+      "gain": 0.0
+    },
+    {
+      "feature": "user_active_degree_2_14_day_new",
+      "gain": 0.0
+    },
+    {
+      "feature": "user_active_degree_30day_retention",
+      "gain": 0.0
+    },
+    {
+      "feature": "user_active_degree_day_new",
+      "gain": 0.0
+    },
+    {
+      "feature": "user_active_degree_UNKNOWN",
+      "gain": 0.0
+    },
+    {
+      "feature": "category_tag_21",
+      "gain": 0.0
+    },
+    {
+      "feature": "category_tag_23",
+      "gain": 0.0
+    },
+    {
+      "feature": "category_tag_24",
+      "gain": 0.0
+    },
+    {
+      "feature": "category_tag_38",
+      "gain": 0.0
+    },
+    {
+      "feature": "category_tag_40",
+      "gain": 0.0
+    },
+    {
+      "feature": "category_tag_56",
+      "gain": 0.0
+    },
+    {
+      "feature": "category_tag_65",
+      "gain": 0.0
+    },
+    {
+      "feature": "category_tag_67",
+      "gain": 0.0
+    },
+    {
+      "feature": "category_tag_68",
+      "gain": 0.0
+    },
+    {
+      "feature": "category_unknown",
+      "gain": 0.0
+    },
+    {
+      "feature": "upload_type_AiCutVideo",
+      "gain": 0.0
+    },
+    {
+      "feature": "upload_type_FollowShoot",
+      "gain": 0.0
+    },
+    {
+      "feature": "upload_type_LipsSync",
+      "gain": 0.0
+    },
+    {
+      "feature": "upload_type_PhotoCopy",
+      "gain": 0.0
+    },
+    {
+      "feature": "upload_type_unknown",
+      "gain": 0.0
+    },
+    {
+      "feature": "video_type_UNKNOWN",
+      "gain": 0.0
+    },
+    {
+      "feature": "video_type_unknown",
+      "gain": 0.0
+    }
+  ],
+  "feature_group_importance": [
+    {
+      "group": "Video history & popularity",
+      "share": 0.4308936804875615
+    },
+    {
+      "group": "Co-watch history",
+      "share": 0.3793607393076175
+    },
+    {
+      "group": "User watch history",
+      "share": 0.06985611709772002
+    },
+    {
+      "group": "SVD embeddings",
+      "share": 0.04485147358838311
+    },
+    {
+      "group": "Video metadata",
+      "share": 0.035750156549989975
+    },
+    {
+      "group": "Category & creator watch history",
+      "share": 0.032247975482538396
+    },
+    {
+      "group": "User profile",
+      "share": 0.004109762261387486
+    },
+    {
+      "group": "Request context",
+      "share": 0.002930095224802022
+    }
+  ],
+  "seconds": 1450.586701873
+}

@@ -20,11 +20,12 @@ def get(url, payload=None):
 def run(api="http://127.0.0.1:8000", stack=False):
     health = get(api + "/health")
     assert health["model_loaded"], health
+    # user_16 is in the bundled KuaiRand subset; requests replay a time after its last play.
     payload = {
-        "user_id": "user_1",
+        "user_id": "user_16",
         "video_id": "video_1",
         "watch_time": 20,
-        "timestamp": "2026-11-08T12:00:00Z",
+        "timestamp": "2022-05-08T16:00:00Z",
     }
     prediction = get(api + "/predict", payload)
     assert 0 <= prediction["probability"] <= 1
@@ -33,17 +34,32 @@ def run(api="http://127.0.0.1:8000", stack=False):
     batch = get(api + "/predict/batch", {"instances": [payload, payload]})
     assert batch["count"] == 2
     assert all(row["probability"] == prediction["probability"] for row in batch["predictions"])
-    recommendations = get(api + "/recommend", {"user_id": "user_1", "top_k": 5})
+    request = {"user_id": "user_16", "top_k": 5, "timestamp": "2022-05-08T16:00:00Z"}
+    recommendations = get(api + "/recommend", request)
     assert len(recommendations["recommendations"]) == 5
-    assert "recommendation_predictions_total" in get(api + "/metrics")
+    assert not recommendations["cold_start"] and recommendations["top_categories"]
+    assert get(api + "/recommend", request)["cached"]
+    cold = get(api + "/recommend", request | {"user_id": "user_9999999"})
+    assert cold["cold_start"] and cold["history_events"] == 0
+    metrics = get(api + "/metrics")
+    for name in [
+        "recommendation_predictions_total",
+        "recommendation_http_duration_seconds_bucket",
+        "recommendation_cache_requests_total",
+        "recommendation_model_seconds_bucket",
+    ]:
+        assert name in metrics, name
     assert get(api + "/monitoring")["window_requests"] >= 4
-    assert "model_name" in get(api + "/model/info")
+    info = get(api + "/model/info")
+    assert "model_name" in info and info["ranking_model"]["name"] == "lightgbm_lambdarank"
     if stack:
         assert health["cache_backend"] == "redis"
         assert "ok" in get("http://127.0.0.1:8501/_stcore/health").lower()
         assert "<html" in get("http://127.0.0.1:8501").lower()
         assert "ok" in get("http://127.0.0.1:5000/health").lower()
         assert "healthy" in get("http://127.0.0.1:9090/-/healthy").lower()
+        rules = get("http://127.0.0.1:9090/api/v1/rules")["data"]["groups"]
+        assert any(group["name"] == "recommendation-api" for group in rules)
     print(
         json.dumps(
             {

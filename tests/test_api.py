@@ -121,3 +121,50 @@ def test_redis_outage_local_fallback():
         assert await cache.get("expired") is None
 
     asyncio.run(run())
+
+
+RECOMMEND = {"user_id": "user_1", "top_k": 3, "timestamp": "2025-01-01T12:00:00Z"}
+
+
+def test_recommend_cache_and_prometheus_metrics(client):
+    first = client.post("/recommend", json=RECOMMEND).json()
+    second = client.post("/recommend", json=RECOMMEND).json()
+    assert first["cached"] is False and second["cached"] is True
+    assert first["recommendations"] == second["recommendations"]
+    assert [row["score"] for row in first["recommendations"]] == sorted(
+        (row["score"] for row in first["recommendations"]), reverse=True
+    )
+    assert client.post("/recommend", json=RECOMMEND | {"top_k": 0}).status_code == 422
+    metrics = client.get("/metrics").text
+    assert 'recommendation_cache_requests_total{endpoint="recommend",result="hit"} 1.0' in metrics
+    assert 'recommendation_cache_requests_total{endpoint="recommend",result="miss"} 1.0' in metrics
+    assert 'recommendation_http_errors_total{route="/recommend",status_class="4xx"} 1.0' in metrics
+    assert 'recommendation_http_duration_seconds_bucket{le="0.04",route="/recommend"}' in metrics
+    assert 'recommendation_model_seconds_count{model="ranker"} 1.0' in metrics
+    monitoring = client.get("/monitoring").json()
+    assert monitoring["cache_hit_ratio"] == 0.5
+    assert monitoring["p95_latency_ms"] >= monitoring["p50_latency_ms"] > 0
+
+
+def test_cold_start_and_history_based_retrieval(client):
+    body = {"top_k": 6, "timestamp": "2025-01-01T12:00:00Z"}
+    new_user = client.post("/recommend", json=body | {"user_id": "user_777777"}).json()
+    assert new_user["cold_start"] is True and new_user["history_events"] == 0
+    assert new_user["top_categories"] == [] and new_user["recommendations"]
+    known = client.post("/recommend", json=body | {"user_id": "user_1"}).json()
+    assert known["cold_start"] is False and known["history_events"] > 0
+    assert known["top_categories"]
+    for extra in [{"profile": {"age": 30}}, {"top_k": 51}, {"user_id": "alice"}]:
+        assert (
+            client.post("/recommend", json=body | {"user_id": "user_1"} | extra).status_code == 422
+        )
+    before_cutoff = body | {"user_id": "user_1", "timestamp": "2023-06-01T00:00:00Z"}
+    assert client.post("/recommend", json=before_cutoff).status_code == 422
+
+
+def test_model_info_exposes_ranking_insights(client):
+    info = client.get("/model/info").json()
+    assert info["ranking_model"]["name"] == "lightgbm_lambdarank"
+    assert info["ranking_benchmark"] and info["ranking_feature_importance"]
+    assert info["ranking_feature_count"] == len(info["ranking_feature_importance"])
+    assert info["candidate_limit"] == 300

@@ -16,3 +16,4 @@ experiments/*.db-wal
 htmlcov/
 .coverage
 data/processed_interactions.csv
+data/raw/

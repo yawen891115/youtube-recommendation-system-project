@@ -79,9 +79,8 @@ def main():
                 f"http://127.0.0.1:{tracking}/api/2.0/mlflow/experiments/search",
                 {"max_results": 20},
             )
-            assert any(
-                row["name"] == "youtube-shorts-chronological" for row in experiments["experiments"]
-            )
+            names = {row["name"] for row in experiments["experiments"]}
+            assert {"youtube-shorts-chronological", "youtube-shorts-ranking"} <= names, names
             print("Local API, Streamlit page and MLflow experiment database: passed")
         except Exception:
             for log in logs:

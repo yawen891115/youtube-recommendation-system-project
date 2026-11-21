@@ -1,0 +1,28 @@
+groups:
+  - name: recommendation-api
+    rules:
+      # Latency: p95 per route from the API's histogram (fine buckets between 5 and 100 ms).
+      - record: route:recommendation_http_duration_seconds:p95_1m
+        expr: histogram_quantile(0.95, sum by (le, route) (rate(recommendation_http_duration_seconds_bucket[1m])))
+      # Errors: share of responses with status >= 400, and server errors alone.
+      - record: route:recommendation_http_error_ratio:1m
+        expr: sum by (route) (rate(recommendation_http_errors_total[1m])) / sum by (route) (rate(recommendation_http_requests_total[1m]))
+      - record: route:recommendation_http_5xx_ratio:1m
+        expr: sum by (route) (rate(recommendation_http_errors_total{status_class="5xx"}[1m])) / sum by (route) (rate(recommendation_http_requests_total[1m]))
+      # Cache: hit ratio per endpoint (/predict, /recommend).
+      - record: endpoint:recommendation_cache_hit_ratio:1m
+        expr: sum by (endpoint) (rate(recommendation_cache_requests_total{result="hit"}[1m])) / sum by (endpoint) (rate(recommendation_cache_requests_total[1m]))
+      - alert: RecommendLatencyP95High
+        expr: route:recommendation_http_duration_seconds:p95_1m{route="/recommend"} > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: /recommend p95 latency has been above 100 ms for 5 minutes
+      - alert: RecommendationServerErrors
+        expr: route:recommendation_http_5xx_ratio:1m{route=~"/recommend|/predict"} > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: More than 1% of prediction or recommendation requests fail with 5xx

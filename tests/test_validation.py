@@ -17,7 +17,8 @@ def test_valid_tables(tmp_path, sample_data):
 
 
 @pytest.mark.parametrize(
-    "case", ["duplicate", "foreign_key", "invalid_duration", "invalid_age", "infinite_watch"]
+    "case",
+    ["duplicate", "foreign_key", "invalid_duration", "invalid_activity", "infinite_watch"],
 )
 def test_invalid_tables_rejected(tmp_path, sample_data, case):
     users, videos, events = [frame.copy() for frame in sample_data]
@@ -27,8 +28,8 @@ def test_invalid_tables_rejected(tmp_path, sample_data, case):
         events.loc[0, "video_id"] = "video_9999"
     elif case == "invalid_duration":
         videos.loc[0, "duration_sec"] = -1.0
-    elif case == "invalid_age":
-        users.loc[0, "age"] = 8
+    elif case == "invalid_activity":
+        users.loc[0, "user_active_degree"] = "super_active"
     else:
         events.loc[0, "watch_time"] = float("inf")
     write_data(tmp_path, (users, videos, events))

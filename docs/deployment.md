@@ -22,25 +22,37 @@ The API loads the committed models through a read-only mount. Redis starts befor
 | `MODEL_DIR` | `models` | Trusted model artifact directory |
 | `REDIS_URL` | unset for local Python; `redis://redis:6379/0` in Compose | Cache / rate-limit store |
 | `REQUESTS_PER_MINUTE` | `120` | Per-client-IP limit for prediction and recommendation requests |
+| `CACHE_TTL_SECONDS` | `60` | Redis TTL of cached predictions and recommendation lists (model-version keyed) |
+| `CANDIDATE_LIMIT` | `300` | Videos retrieved per recommendation request before LambdaRank scoring |
+| `REPLAY_TIME` | `2022-05-08T16:00:00Z` in Compose | Request time used when a request omits `timestamp` (the bundled data ends in May 2022); unset means "now" |
 | `API_BASE_URL` | `http://127.0.0.1:8000` | UI's API URL; Compose sets `http://api:8000` |
-| Prediction cache TTL | 60 seconds | Model-version and effective-request keyed cache |
 
 All published Compose ports bind to `127.0.0.1`. Redis stays on the Compose network and has no published host port. The application does not trust arbitrary forwarded IP headers. Add authentication and an appropriately configured proxy before any public deployment.
 
 The `/health` endpoint returns HTTP 503 when artifacts are absent, corrupt or incompatible. Predictions also return HTTP 503 in that state; they never fall back to an untrained placeholder model. Redis failure falls back to bounded process-local state. This fallback is for a single process and does not provide a distributed rate limit.
 
-Prometheus scrapes `/metrics` every 15 seconds. Request labels use bounded route names. The Streamlit dashboard's `/monitoring` history holds the most recent 1,000 application requests in memory; it is not a durable analytics database. Standard HTTP logs report route, status and latency.
+Prometheus scrapes `/metrics` every 5 seconds and evaluates `monitoring/rules.yml`: recording rules for per-route p95 latency (`route:recommendation_http_duration_seconds:p95_1m`), error ratios and per-endpoint cache hit ratio, plus alerts for `/recommend` p95 above 100 ms and 5xx ratio above 1%. The API exports `recommendation_http_duration_seconds` (histogram with 5–100 ms buckets), `recommendation_http_errors_total`, `recommendation_cache_requests_total{endpoint,result}`, `recommendation_model_seconds` and request counters. Request labels use bounded route names. The Streamlit dashboard's `/monitoring` history holds the most recent 1,000 application requests in memory; it is not a durable analytics database.
+
+To measure latency against a running stack, raise the rate limit and run the load generator:
+
+```bash
+REQUESTS_PER_MINUTE=1000000 CACHE_TTL_SECONDS=600 docker compose up -d --wait
+python scripts/benchmark_latency.py --requests 1000 --concurrency 1 4 8
+```
 
 ## Train and inspect experiments
 
 ```bash
-python -m src.train --trials 5
+python scripts/prepare_kuairand.py --download   # optional: rebuild data/ from KuaiRand-Pure
+python -m src.train                              # classifier (5 trials) + ranker (12 trials)
 MLFLOW_DISABLE_TELEMETRY=true mlflow server --backend-store-uri sqlite:///experiments/mlflow.db --host 127.0.0.1 --port 5000
 ```
 
+MLflow holds two experiments: `youtube-shorts-ranking` (one run per ranking model with validation and test NDCG@10, HR@10, MRR, AUC, the Optuna trace and the paired bootstrap result) and `youtube-shorts-chronological` (the like classifier).
+
 MLflow telemetry is disabled in the project and both containers. Experiment parameters and metrics stay in the configured local SQLite store.
 
-The committed database includes actual runs. A human-readable export is provided in `reports/mlflow_runs.json` and `reports/optuna_trials.csv`. Training rewrites the model bundle and processed dataset. Restart the API after replacing its model bundle; its cache key includes the classifier, ranker and feature-pipeline version.
+The committed database includes actual runs. Human-readable exports are in `reports/mlflow_runs.json`, `reports/optuna_trials.csv` and `reports/ranker_optuna_trials.csv`. Training rewrites the model bundle and processed dataset. Restart the API after replacing its model bundle; its cache key includes the classifier, ranker and feature-pipeline version.
 
 The assignment's optional CUDA-based training environment is supplied separately:
 

@@ -4,8 +4,8 @@ build-backend = 'setuptools.build_meta'
 
 [project]
 name = 'youtube-shorts-recommendation'
-version = '1.0.0'
-description = 'Chronological engagement modeling and a complete recommendation serving demo'
+version = '2.0.0'
+description = 'Chronological LightGBM LambdaRank video ranking with a monitored five-service serving stack'
 authors = [{name = 'Yawen Zheng'}]
 requires-python = '>=3.12'
 
@@ -15,6 +15,10 @@ packages = ['src']
 [tool.pytest.ini_options]
 testpaths = ['tests']
 pythonpath = ['.']
+filterwarnings = [
+    "ignore:The argument 'eval_set' is deprecated",
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated",
+]
 
 [tool.ruff]
 line-length = 100
